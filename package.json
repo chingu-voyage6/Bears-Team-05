@@ -1,0 +1,20 @@
+{
+  "name": "Bears-Team-05",
+  "version": "1.0.0",
+  "description": "Multi player tetris",
+  "main": "server.js",
+  "repository": "https://github.com/chingu-voyage6/Bears-Team-05.git",
+  "author": "Chingu Bears Team #5",
+  "license": "MIT",
+  "scripts": {
+    "client": "cd client && yarn start",
+    "server": "nodemon server.js",
+    "dev": "concurrently --kill-others-on-fail \"yarn server\" \"yarn client\""
+  },
+  "dependencies": {
+    "express": "^4.16.3"
+  },
+  "devDependencies": {
+    "concurrently": "^3.5.1"
+  }
+}
