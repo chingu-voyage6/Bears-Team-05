@@ -3,6 +3,7 @@ import logo from './logo.svg';
 import './App.css';
 
 class App extends Component {
+  //Added constructor and componenDidMount to test server response
   constructor(props){
     super(props)
     this.state={

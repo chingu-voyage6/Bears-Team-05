@@ -1,4 +1,4 @@
-//root component handle authentication here
+//root component, can handle authentication here
 import React, { Component } from 'react';
 
 class Main extends Component {

@@ -14,7 +14,7 @@ import { Provider } from 'react-redux'
 import { Router, Route, browserHistory, IndexRoute } from 'react-router'
 
 
-//**apply redux store in root**//
+
 //import combined reducers
 import reducers from './Reducers/index'
 //import react components used for routing below
@@ -34,8 +34,7 @@ store.dispatch({
 })
 //end testing
 
-
-
+//Wrap components in Provider and assign routes
 const Routes =(
     <Provider store={store}>
         <Router history={browserHistory}>
