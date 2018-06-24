@@ -4,22 +4,22 @@ import './App.css';
 
 class App extends Component {
   //Added constructor and componenDidMount to test server response
-  constructor(props){
-    super(props)
-    this.state={
-      fromServer:''
-    }
+  constructor(props) {
+    super(props);
+    this.state = {
+      fromServer: '',
+    };
   }
-  componentDidMount(){
+  componentDidMount() {
     fetch('/api')
-    .then((response)=>{
-      return response.json()
-    })
-    .then((serverMessage)=>{
-      this.setState({
-        fromServer:serverMessage
+      .then(response => {
+        return response.json();
       })
-    })
+      .then(serverMessage => {
+        this.setState({
+          fromServer: serverMessage,
+        });
+      });
   }
   render() {
     return (
