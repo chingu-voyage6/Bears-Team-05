@@ -3,24 +3,25 @@ import logo from './logo.svg';
 import './App.css';
 
 class App extends Component {
-  //Added constructor and componenDidMount to test server response
+
+  // Added constructor and componenDidMount to test server response
   constructor(props) {
     super(props);
     this.state = {
       fromServer: '',
     };
   }
+
   componentDidMount() {
     fetch('/api')
-      .then(response => {
-        return response.json();
-      })
-      .then(serverMessage => {
+      .then(response => response.json())
+      .then((serverMessage) => {
         this.setState({
           fromServer: serverMessage,
         });
       });
   }
+
   render() {
     return (
       <div className="App">
@@ -35,6 +36,7 @@ class App extends Component {
       </div>
     );
   }
+
 }
 
 export default App;
