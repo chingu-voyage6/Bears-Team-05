@@ -1,6 +1,7 @@
 const express = require('express');
 
 const app = express();
+require('dotenv').config();
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const http = require('http').Server(app);
@@ -11,9 +12,9 @@ module.exports = { io };
 const socketManager = require('./services/socketManager');
 const router = require('./router');
 
-const mongodbServer = 'mongodb://localhost:27017/tetris';
-mongoose.connect(mongodbServer, () => {
-  // mongoose.connection.db.dropDatabase();
+
+mongoose.connect(process.env.MONGOLAB_URI, () => {
+  console.log(`Connected to ${process.env.MONGOLAB_URI}`);
 });
 mongoose.set('debug', true);
 
