@@ -33,6 +33,7 @@ module.exports = {
       1,
       { 'extensions': ['.js', '.jsx'] }
     ],
-    'react/jsx-uses-vars': [2]
+    'react/jsx-uses-vars': [2],
+    'linebreak-style': ["error",process.env.OS==='Windows_NT' ? "windows" : "unix"]
   }
 };
