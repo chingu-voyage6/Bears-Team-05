@@ -1,5 +1,22 @@
-body {
+html, body {
+  box-sizing: border-box;
+  font-family: Arial, Helvetica, sans-serif;
   margin: 0;
   padding: 0;
-  font-family: sans-serif;
+}
+
+body {
+  background: url('./assets/splash.jpg');
+  background-size: cover;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* router NavLink active class */
+.is-active {
+  border-bottom: 2px solid white;
 }

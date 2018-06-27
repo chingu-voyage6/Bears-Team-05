@@ -1,0 +1,36 @@
+header {
+  background-color: rgba(56,84,99,0.7);
+  box-sizing: border-box;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 80px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  height: 100%;
+  align-items: center;
+  max-width: 1000px;
+  margin: auto;
+  padding: 0 60px;
+}
+
+.header h1, a {
+  margin: 0;
+  padding: 0;
+}
+
+.header a {
+  color: white;
+  text-decoration: none;
+}
+
+.header a:hover {
+  text-decoration: underline;
+}
+
+.header__right a {
+  margin-left: 20px;
+}

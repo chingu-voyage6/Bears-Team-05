@@ -7,15 +7,11 @@ import thunk from 'redux-thunk';
 import logger from 'redux-logger';
 import reducers from './Reducers/index';
 
-import { Router, Route, browserHistory, IndexRoute } from 'react-router';
+import AppRouter from './routers/AppRouter';
 
 import { unregister } from './registerServiceWorker';
 
 import './index.css';
-import App from './App';
-
-import Main from './Components/main';
-import Test from './Components/test';
 
 // apply middleware amd create store
 const middleware = applyMiddleware(thunk, logger);
@@ -30,17 +26,11 @@ store.dispatch({
 });
 // end testing
 
-// Wrap components in Provider and assign routes
-const Routes = (
+const rootJsx = (
   <Provider store={store}>
-    <Router history={browserHistory}>
-      <Route path="/" component={Main}>
-        <IndexRoute component={App} />
-        <Route path="/test" component={Test} />
-      </Route>
-    </Router>
+    <AppRouter />
   </Provider>
 );
 
-ReactDOM.render(Routes, document.getElementById('root'));
+ReactDOM.render(rootJsx, document.getElementById('root'));
 unregister();
