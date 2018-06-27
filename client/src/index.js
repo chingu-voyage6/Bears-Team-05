@@ -17,6 +17,7 @@ import './index.css';
 const middleware = applyMiddleware(thunk, logger);
 const store = createStore(reducers, middleware);
 
+<<<<<<< HEAD
 // only for testing redux store see console for logger output
 store.dispatch({
   type: 'BEGIN',
@@ -27,6 +28,10 @@ store.dispatch({
 // end testing
 
 const rootJsx = (
+=======
+// Wrap components in Provider and assign routes
+const Routes = (
+>>>>>>> add auth action/reducer, validate client side auth, clean lint errors
   <Provider store={store}>
     <AppRouter />
   </Provider>
