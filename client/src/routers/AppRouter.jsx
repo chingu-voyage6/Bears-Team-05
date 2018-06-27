@@ -2,10 +2,10 @@ import React from 'react';
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
 
 // Our components
-import Header from '../Components/Header/Header';
-import Landing from '../Components/Landing/Landing';
 import Footer from '../Components/Footer/Footer';
 import FourOhFour from '../Components/FourOhFour/FourOhFour';
+import Header from '../Components/Header/Header';
+import Landing from '../Components/Landing/Landing';
 import Leaderboard from '../Components/Leaderboard/Leaderboard';
 import Login from '../Components/Login/Login';
 import Register from '../Components/Register/Register';
