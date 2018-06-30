@@ -3,20 +3,20 @@ import PropTypes from 'prop-types';
 import { NavLink } from 'react-router-dom';
 
 import './Header.css';
+
 // connect to redux and get action creators
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import getUser from '../../Actions/authentiation';
-
-function mapStateToProps(state) { // read store
-  return state;
-}
-function mapDispatchToProps(dispatch) { // write to store
-  return bindActionCreators({
+// reads from store
+const mapStateToProps = state => state;
+// writes to store
+const mapDispatchToProps = dispatch =>
+  bindActionCreators({
     getUser,
   }, dispatch);
-}
 // end redux
+
 class Header extends React.Component {
 
   constructor(props) {

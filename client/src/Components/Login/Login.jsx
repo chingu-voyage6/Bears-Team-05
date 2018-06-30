@@ -5,9 +5,7 @@ import PropTypes from 'prop-types';
 // connect to redux
 import { connect } from 'react-redux';
 
-function mapStateToProps(state) { // read store
-  return state;
-}
+const mapStateToProps = state => state;
 
 // end redux
 class Login extends React.Component {

@@ -1,5 +1,5 @@
 // test reducer sample for making individual reducers
-export default (state = '', action) => {
+const testReducer = (state = '', action) => {
   switch (action.type) {
     case 'BEGIN':
       return 'Testing has Begun';
@@ -11,3 +11,5 @@ export default (state = '', action) => {
 
   return state;
 };
+
+export default testReducer;

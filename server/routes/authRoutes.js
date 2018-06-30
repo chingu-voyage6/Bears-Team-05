@@ -20,7 +20,7 @@ router.get('/auth/logout', (req, res) => {
 // we can add a guest route here below  if necessary
 
 // Auth route middleware, checks if a user is logged in or not
-function isLoggedIn(req, res, next) {
+const isLoggedIn = (req, res, next) => {
   if (req.isAuthenticated()) return next();
 
   // if not authenticated then ...populate the client profile page accordingly
@@ -41,7 +41,7 @@ function isLoggedIn(req, res, next) {
     authenticationService: null,
   });
   return false;
-}
+};
 
 // Authentication result  route for client side consumption
 router.get('/api/profile', isLoggedIn, (req, res) => {
