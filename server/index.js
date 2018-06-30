@@ -1,26 +1,42 @@
 const express = require('express');
 
 const app = express();
+require('dotenv').config();
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
 const mongoose = require('mongoose');
+const cookieSession = require('cookie-session');
+const passport = require('passport');
 
 module.exports = { io };
 const socketManager = require('./services/socketManager');
-const router = require('./router');
-
-const mongodbServer = 'mongodb://localhost:27017/tetris';
-mongoose.connect(mongodbServer, () => {
-  // mongoose.connection.db.dropDatabase();
-});
-mongoose.set('debug', true);
+const router = require('./routes/router');
+const authRoutes = require('./routes/authRoutes');
 
 app.use(bodyParser.json({ limit: '5mb' }));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
-// app.use(express.static('public'));
+// set up session cookies
+app.use(cookieSession({
+  maxAge: 21 * 24 * 60 * 60 * 1000,
+  keys: [process.env.COOKIE_KEY],
+}));
+
+// initialize passport
+require('./services/passportConfig');
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+mongoose.connect(process.env.MONGOLAB_URI, () => {
+  console.log(`Connected to ${process.env.MONGOLAB_URI}`);
+});
+mongoose.set('debug', true);
+
+app.use(authRoutes);
+
 router(app);
 io.on('connection', socketManager);
 

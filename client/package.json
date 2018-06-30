@@ -5,9 +5,13 @@
   "proxy": {
     "/api/*": {
       "target": "http://localhost:5000"
+    },
+    "/auth/*": {
+      "target": "http://localhost:5000"
     }
   },
   "dependencies": {
+    "axios": "^0.18.0",
     "prop-types": "^15.6.1",
     "react": "^16.4.1",
     "react-dom": "^16.4.1",

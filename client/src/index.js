@@ -17,15 +17,7 @@ import './index.css';
 const middleware = applyMiddleware(thunk, logger);
 const store = createStore(reducers, middleware);
 
-// only for testing redux store see console for logger output
-store.dispatch({
-  type: 'BEGIN',
-});
-store.dispatch({
-  type: 'END',
-});
-// end testing
-
+// Wrap components in Provider and assign routes
 const rootJsx = (
   <Provider store={store}>
     <AppRouter />
