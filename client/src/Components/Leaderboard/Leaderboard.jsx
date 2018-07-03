@@ -1,32 +1,88 @@
 import React from 'react';
 import './Leaderboard.css';
 
-let dummyData = [
+const dummyData = [
   {
-    username: "Quincy",
-    bestScore: Math.round(Math.random()*1000)
+    username: 'Quincy',
+    bestScore: Math.round(Math.random() * 1000),
   },
   {
-    username: "Dave",
-    bestScore: Math.round(Math.random()*1000)
+    username: 'Dave',
+    bestScore: Math.round(Math.random() * 1000),
   },
   {
-    username: "Joseph",
-    bestScore: Math.round(Math.random()*1000)
+    username: 'Joseph',
+    bestScore: Math.round(Math.random() * 1000),
   },
   {
-    username: "Donald",
-    bestScore: Math.round(Math.random()*1000)
+    username: 'Donald',
+    bestScore: Math.round(Math.random() * 1000),
   },
   {
-    username: "Danica",
-    bestScore: Math.round(Math.random()*1000)
-  }
-]
-
-dummyData.sort((a,b) => {
-  return b.bestScore-a.bestScore;
-})
+    username: 'Danica',
+    bestScore: Math.round(Math.random() * 1000),
+  },
+  {
+    username: 'Yancy',
+    bestScore: Math.round(Math.random() * 1000),
+  },
+  {
+    username: 'belcurv',
+    bestScore: Math.round(Math.random() * 1000),
+  },
+  {
+    username: 'terrance',
+    bestScore: Math.round(Math.random() * 1000),
+  },
+  {
+    username: 'rbertram8',
+    bestScore: Math.round(Math.random() * 1000),
+  },
+  {
+    username: 'Dereje',
+    bestScore: Math.round(Math.random() * 1000),
+  },
+  {
+    username: 'Chance',
+    bestScore: Math.round(Math.random() * 1000),
+  },
+  {
+    username: 'Adam',
+    bestScore: Math.round(Math.random() * 1000),
+  },
+  {
+    username: 'Kate',
+    bestScore: Math.round(Math.random() * 1000),
+  },
+  {
+    username: 'Kitty',
+    bestScore: Math.round(Math.random() * 1000),
+  },
+  {
+    username: 'Bernard',
+    bestScore: Math.round(Math.random() * 1000),
+  },
+  {
+    username: 'Kevin',
+    bestScore: Math.round(Math.random() * 1000),
+  },
+  {
+    username: 'Iggy',
+    bestScore: Math.round(Math.random() * 1000),
+  },
+  {
+    username: 'terrance',
+    bestScore: Math.round(Math.random() * 1000),
+  },
+  {
+    username: 'rbertram8',
+    bestScore: Math.round(Math.random() * 1000),
+  },
+  {
+    username: 'Dereje',
+    bestScore: Math.round(Math.random() * 1000),
+  },
+];
 
 const Leaderboard = () => (
   <div className="leaderboard">
@@ -34,20 +90,17 @@ const Leaderboard = () => (
       <div className="board-header">
         High Scores
       </div>
-        {dummyData.map((x,i) => {
-          if (i < 10) {
-            return (
-              <div className="leaderboard-player">
-                <p>
-                  {x.username}
-                </p>
-                <p>
-                  {x.bestScore}
-                </p>
-              </div>
-            )
-          }
-        })}
+      {
+        dummyData
+          .sort((a, b) => b.bestScore - a.bestScore)
+          .filter((dummy, index) => index < 10)
+          .map(x => (
+            <div key={x.name} className="leaderboard-player">
+              <p>{x.username}</p>
+              <p>{x.bestScore}</p>
+            </div>
+          ))
+      }
     </div>
   </div>
 );
