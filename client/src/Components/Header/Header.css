@@ -25,10 +25,15 @@ header {
 .header a {
   color: white;
   text-decoration: none;
+  outline: none;
 }
 
 .header a:hover {
-  text-decoration: underline;
+  border-bottom: 2px solid rgb(0, 255, 200);
+}
+
+.header a.is-active {
+  border-bottom: 2px solid white;
 }
 
 .header__right a {
