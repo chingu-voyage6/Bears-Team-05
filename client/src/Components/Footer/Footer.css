@@ -1,7 +1,7 @@
 footer {
   background-color: #333333;
   color: white;
-  height: 80px;
+  min-height: 60px;
 }
 
 .footer {

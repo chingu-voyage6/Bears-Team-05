@@ -9,6 +9,7 @@ import Landing from '../Components/Landing/Landing';
 import Leaderboard from '../Components/Leaderboard/Leaderboard';
 import Login from '../Components/Login/Login';
 import Register from '../Components/Register/Register';
+import Privacy from '../Components/Privacy/Privacy';
 
 const AppRouter = () => (
   <BrowserRouter>
@@ -19,6 +20,7 @@ const AppRouter = () => (
         <Route path="/leaderboard" component={Leaderboard} />
         <Route path="/login" component={Login} />
         <Route path="/register" component={Register} />
+        <Route path="/privacy" component={Privacy} />
         <Route component={FourOhFour} />
       </Switch>
       <Footer />
