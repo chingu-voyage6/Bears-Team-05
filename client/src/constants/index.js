@@ -1,4 +1,5 @@
 module.exports = {
+  USER_CONNECTED: 'USER_CONNECTED',
   SOCKET_EVENTS: [
     'USER_CONNECTED',
     'USER_DISCONNECTED',
