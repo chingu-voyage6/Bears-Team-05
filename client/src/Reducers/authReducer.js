@@ -1,4 +1,4 @@
-import { GET_USER_STATUS } from '../Actions/authentiation';
+import { GET_USER_STATUS } from '../Actions/authentication';
 
 // store reducer handles all authentication actions
 const userStatusReducer = (state = {}, action) => {
