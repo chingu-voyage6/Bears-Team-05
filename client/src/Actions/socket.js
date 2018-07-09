@@ -3,7 +3,7 @@ import io from 'socket.io-client';
 import {
   serverUrl,
   SOCKET_EVENTS,
-} from '../../../constants';
+} from '../constants';
 
 export const socket = io(serverUrl());
 

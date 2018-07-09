@@ -1,13 +1,26 @@
 import axios from 'axios';
 
-export const GET_USER_STATUS = 'GET_USER_STATUS';
+import { GET_USER_STATUS, USER_CONNECTED } from '../constants';
+import { initSocket, socket } from './socket';
 
-export function getUser() {
-  return async (dispatch) => {
-    const response = await axios.get('/api/profile');
-    dispatch({
-      type: GET_USER_STATUS,
-      payload: response.data,
+export const getUser = () => (dispatch) => {
+  initSocket(dispatch);
+  socket.emit(USER_CONNECTED, 'new user connected');
+
+  axios
+    .get('/api/profile')
+    .then(({ data }) => {
+      dispatch({
+        type: GET_USER_STATUS,
+        payload: data,
+      });
+    })
+    .catch((err) => {
+      console.log(`getUser failed: ${err}`);
     });
-  };
-}
+};
+
+export const authSuccess = () => {
+  console.log('login success');
+};
+
