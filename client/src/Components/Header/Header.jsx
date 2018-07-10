@@ -7,7 +7,7 @@ import './Header.css';
 // connect to redux and get action creators
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
-import { getUser } from '../../Actions/authentiation';
+import { getUser } from '../../Actions/authentication';
 
 // reads from store
 const mapStateToProps = state => state;

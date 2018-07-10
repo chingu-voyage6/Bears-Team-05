@@ -1,6 +1,5 @@
-import { GET_USER_STATUS } from '../Actions/authentiation';
+import { GET_USER_STATUS } from '../constants';
 
-// store reducer handles all authentication actions
 const userStatusReducer = (state = {}, action) => {
   switch (action.type) {
     case GET_USER_STATUS:
