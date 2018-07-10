@@ -4,7 +4,7 @@ import {
   resetPlayer,
   rotate,
   getPalette
-} from '../../utils/';
+} from '../utils/';
 
 import {
   PLAYER_ROTATE,
