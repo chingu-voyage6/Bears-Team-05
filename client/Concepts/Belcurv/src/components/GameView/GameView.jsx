@@ -48,17 +48,24 @@ class GameView extends React.Component {
       this.draw();
     }
     return (
-      <Canvas className="game-canvas"
-        width={ width } height={ height } scale={ scale }
-        onContext={ context => this.setState({ context })}
+      <Canvas
+        className="game-canvas"
+        width={width}
+        height={height}
+        scale={scale}
+        onContext={context => this.setState({ context })}
       />
     );
   }
 
 }
 
+GameView.defaultProps = {
+  arena: [],
+};
+
 GameView.propTypes = {
-  arena : PropTypes.array.isRequired,
+  arena : PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.any)),
   canvas : PropTypes.shape({
     width  : PropTypes.number,
     height : PropTypes.number,

@@ -6,4 +6,4 @@ export { default as rotate }        from './rotate';
 export { default as resetPlayer }   from './resetPlayer';
 export { default as calculateKick } from './calculateKick';
 export { default as getPalette }    from './getPalette';
-export { default as findFullRows }    from './findFullRows';
+export { default as findFullRows }  from './findFullRows';

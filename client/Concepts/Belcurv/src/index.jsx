@@ -10,7 +10,7 @@ import './index.css';
 const appRoot = document.getElementById('app');
 
 render(
-  <Provider store={ store }>
+  <Provider store={store}>
     <App />
   </Provider>,
   appRoot
