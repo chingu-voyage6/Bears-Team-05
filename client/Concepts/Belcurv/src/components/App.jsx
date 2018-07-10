@@ -1,11 +1,10 @@
 /* ================================= SETUP ================================= */
 
-import React       from 'react';
-import PropTypes   from 'prop-types';
-import Mousetrap   from 'mousetrap';
-import { connect } from 'react-redux';
-import { bindActionCreators } from 'redux';
-
+import React                       from 'react';
+import PropTypes                   from 'prop-types';
+import Mousetrap                   from 'mousetrap';
+import { connect }                 from 'react-redux';
+import { bindActionCreators }      from 'redux';
 import { collides, calculateKick } from '../utils';
 
 import {
@@ -16,7 +15,7 @@ import {
   updateScore,
   resetScore,
   setPalette
-} from '../store/actions/playerActions';
+} from '../actions/playerActions';
 
 import {
   mergePlayerArena,
@@ -24,7 +23,7 @@ import {
   updateArena,
   togglePause,
   rowFlash
-} from '../store/actions/gameActions';
+} from '../actions/gameActions';
 
 import GameView   from './GameView/GameView';
 import ScoreBoard from './ScoreBoard/ScoreBoard';
@@ -62,6 +61,18 @@ class App extends React.Component {
     Mousetrap.unbind('a');
     Mousetrap.unbind('d');
     Mousetrap.unbind('s');
+  }
+
+  ontogglePause = () => {
+    this.props.actions.togglePause();
+  }
+
+  onChangePalette = () => {
+    this.setState(prevState => ({
+      paletteIndex: ((prevState.paletteIndex + 1) % 6)
+    }), () => {
+      this.props.actions.setPalette(this.state.paletteIndex);
+    });
   }
 
   /* === for testing dead row insertion === */
@@ -169,7 +180,6 @@ class App extends React.Component {
     if (!this.props.gameState.paused) {
       
       /* == perform loop work here == */
-      
       const deltaTime = time - this.state.lastTime;
       
       this.setState(prevState => (
@@ -187,24 +197,14 @@ class App extends React.Component {
     this.frameId = window.requestAnimationFrame(this.update);
   }
 
-  ontogglePause = () => {
-    this.props.actions.togglePause();
-  }
-
-  onChangePalette = () => {
-    this.setState(prevState => ({
-      paletteIndex: ((prevState.paletteIndex + 1) % 6)
-    }), () => {
-      this.props.actions.setPalette(this.state.paletteIndex);
-    });
-  }
-
   render() {
     return (
       <div className="app-container">
-        <ScoreBoard score={ this.props.player.score }
-          changePalette={ this.onChangePalette }
-          togglePause={ this.ontogglePause } />
+        <ScoreBoard
+          score={this.props.player.score}
+          changePalette={this.onChangePalette}
+          togglePause={this.ontogglePause}
+        />
         <GameView />
       </div>
     );
@@ -212,8 +212,12 @@ class App extends React.Component {
 
 }
 
+App.defaultProps = {
+  arena: [],
+};
+
 App.propTypes = {
-  arena : PropTypes.array.isRequired,
+  arena : PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.any)),
   gameState : PropTypes.shape({
     paused : PropTypes.bool
   }).isRequired,
