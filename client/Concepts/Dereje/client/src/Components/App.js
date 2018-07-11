@@ -142,10 +142,9 @@ class App extends Component{
       }
       //retreive total rows cleared (if any) and test for time interval reduction
       const rowsCleared = collisionResult[1] ? collisionResult[1].length : 0
-      const reduceTimeinterval = ((this.state.points.linesCleared + rowsCleared) > this.state.points.levelUp && this.state.timerInterval > 250) ? true : false
+      const reduceTimeinterval = (((this.state.points.totalLinesCleared  + rowsCleared)% this.state.points.levelUp) ===0  && this.state.timerInterval > 250) ? true : false
       //assign points if winner found
-      copyOfPoints.linesCleared = reduceTimeinterval ? 0 : this.state.points.linesCleared + rowsCleared
-      copyOfPoints.totalLinesCleared = rowsCleared ? this.state.points.totalLinesCleared  + rowsCleared: this.state.points.totalLinesCleared
+      copyOfPoints.totalLinesCleared = this.state.points.totalLinesCleared  + rowsCleared
       //assign new rubble coordinates
       copyOfRubble.occupiedCells = collisionResult[0]
       copyOfRubble.winRows = collisionResult[1]
@@ -209,20 +208,29 @@ class App extends Component{
         this.updateScreen(copyOfActiveShape)
       }
       else if(down) this.tick()
-      else this.rotation()
+      else this.rotation(this.state.activeShape)
     }
 
-  rotation = () =>{
-      let copyOfActiveShape = Object.assign({},this.state.activeShape)
-      copyOfActiveShape.unitVertices = tetrisShapes.onRotate(copyOfActiveShape.unitVertices)
-      copyOfActiveShape.rotationStage = copyOfActiveShape.rotationStage > 2 ? 0 : copyOfActiveShape.rotationStage + 1
-      const boundingBox = tetrisShapes.onBoundingBox(tetrisShapes.getAbsoluteVertices(this.state.activeShape.unitBlockSize,this.state.activeShape.xPosition,this.state.activeShape.yPosition,copyOfActiveShape.unitVertices))
+  rotation = (active) =>{
+      const unitVerticesAfterRotation = tetrisShapes.onRotate(active.unitVertices)
+      const boundingBox = tetrisShapes.onBoundingBox(tetrisShapes.getAbsoluteVertices(this.state.activeShape.unitBlockSize,this.state.activeShape.xPosition,this.state.activeShape.yPosition,unitVerticesAfterRotation))
 
-      if(boundingBox[0]<0 || boundingBox[1]>this.state.canvasWidth){
-        return
+      let copyOfActiveShape = Object.assign({},this.state.activeShape)
+      copyOfActiveShape.unitVertices = unitVerticesAfterRotation
+      copyOfActiveShape.rotationStage = copyOfActiveShape.rotationStage > 2 ? 0 : copyOfActiveShape.rotationStage + 1
+
+      //crude wall kicks, ideally should translate with a recursive function
+      if(boundingBox[0]<0 || boundingBox[1]>this.state.canvasWidth){ //side wall kicks
+        const translateUnits = this.state.activeShape.name === 'shapeI' ? 2 : 1
+        if(boundingBox[0]<0){//translate to the left 
+          copyOfActiveShape.xPosition = copyOfActiveShape.xPosition + (translateUnits*this.state.activeShape.unitBlockSize)
+        }
+        else{//translate to the right
+          copyOfActiveShape.xPosition = copyOfActiveShape.xPosition - (translateUnits*this.state.activeShape.unitBlockSize)
+        }
       }
       this.updateScreen(copyOfActiveShape)
-    }
+  }
   getSideBlock = (direction)=>{
     const cellCheck = this.state.activeShape.cells.map((c)=>{
       if(direction === 'L'){
@@ -253,7 +261,7 @@ class App extends Component{
             Reset
           </button>
           <label htmlFor="test">Lines Cleared = {this.state.points.totalLinesCleared}</label>
-          <label htmlFor="test">Level = {Math.floor(this.state.points.totalLinesCleared/(this.state.points.levelUp+1))}</label>
+          <label htmlFor="test">Level = {Math.floor(this.state.points.totalLinesCleared/(this.state.points.levelUp))}</label>
           <label>
             Pause:
             <input
@@ -282,9 +290,8 @@ const initialState={ //determine what needs to go into state, a very small porti
   paused:false,
   nextShape:'',
   points:{
-    linesCleared:0,
     totalLinesCleared:0,
-    levelUp:4
+    levelUp:5
   },
   rubble:{// all screen info of rubble
     occupiedCells:[],
