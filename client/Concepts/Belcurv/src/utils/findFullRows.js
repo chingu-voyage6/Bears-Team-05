@@ -1,22 +1,16 @@
 /**
  * Finds full rows in arena
+ * A full row means all array elements contain an integer between 1 - 7
  * @param    {Array}   arena   Game arena
- * @returns  {Array}           Indices of full rows
+ * @returns  {Array}           Indices of full rows in reverse order, eg: [4, 3]
 */
 const findFullRows = (arena) => {
-  let rowIndices = [];
-
-  outer: for (let y = arena.length - 1; y >= 0; --y) {
-    for (let x = 0; x < arena[y].length; x++) {
-      // if a row is NOT filled, or is filled with X's, continue
-      if (arena[y][x] === 0 || arena[y][x] === 'X') {
-        continue outer;
-      }
-    }
-    // else, push the y index to rowIndices
-    rowIndices.push(y);
-  }
-  return rowIndices;
+  return arena
+    .reduce((fullRows, row, ind) => {
+      return row.every(value => (value > 0 && value < 8))
+        ? [ind, ...fullRows] // add new element to front of existing array
+        : fullRows;
+    }, []);
 };
 
 export default findFullRows;
