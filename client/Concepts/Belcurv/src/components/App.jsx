@@ -5,7 +5,8 @@ import PropTypes                   from 'prop-types';
 import Mousetrap                   from 'mousetrap';
 import { connect }                 from 'react-redux';
 import { bindActionCreators }      from 'redux';
-import { collides, calculateKick } from '../utils';
+
+import { calculateKick, collides, findFullRows } from '../utils';
 
 import {
   playerDrop,
@@ -86,35 +87,28 @@ class App extends React.Component {
   }
 
   arenaSweep = () => {
-    let rowCount = 1;
-    let newArena = this.props.arena.map(row => row.slice(0));
-    outer: for (let y = newArena.length - 1; y > 0; --y) {
-      for (let x = 0; x < newArena[y].length; x++) {
-        // if a row is NOT filled, or is filled with X's, continue
-        if (newArena[y][x] === 0 || newArena[y][x] === 'X') {
-          continue outer;
-        }
-      }
+    let rowPointVal = 1;
+    let newArena    = this.props.arena.map(row => row.slice(0));
+    const fullRows  = findFullRows(this.props.arena);
 
-      this.props.actions.rowFlash(y);
+    fullRows.forEach((row, ind) => {
+      // briefly highlight completed rows
+      newArena[row].fill('F');
 
       setTimeout(() => {
-        // remove the row with all filled positions, return zero-filled row
-        const row = newArena.splice(y, 1)[0].fill(0);
+        // must increment row + index as we splice rows out
+        const removedRow = newArena.splice(row + ind, 1)[0];
         // insert that zeroed row at the top of the arena
-        newArena.unshift(row);
-        // update actual arena
-        this.props.actions.updateArena(newArena);
-        // increment y since we removed a row
-        y++;
-        // update player score
-        this.props.actions.updateScore(rowCount * 10);
+        newArena.unshift(removedRow.fill(0));
+        this.props.actions.updateScore(rowPointVal * 10);
         // make each additional filled row count 2x as much
-        rowCount *= 2;
-
+        rowPointVal *= 2;
       }, 200);
-
-    }
+      
+    });
+    
+    // update actual arena
+    this.props.actions.updateArena(newArena);
   }
 
   playerMove = (direction) => {
