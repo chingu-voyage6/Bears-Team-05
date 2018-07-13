@@ -8,6 +8,19 @@ export const drawGrid = (x,y,occupied,b,canvasContext) =>{
     canvasContext.rect(x,y,b,b); 
     canvasContext.stroke();
   }
+export const drawGridSpecial = (x,y,occupied,b,canvasContext)=>{
+    if(x===0){
+        let col = occupied ? 'grey' : 'white'
+        canvasContext.beginPath();
+        canvasContext.lineWidth="3";
+        canvasContext.strokeStyle=col;
+        canvasContext.rect(x,y,b,b); 
+        canvasContext.stroke();
+        canvasContext.fillStyle = 'white';
+        canvasContext.rect(x,y,b,b);
+        canvasContext.fill();
+    }
+}
 export const drawShape = (canvasContext,updatedShape,state) =>{
     const drawResults = tetrisShapes.getDims(updatedShape)
     updatedShape.boundingBox = drawResults[0]
@@ -26,25 +39,28 @@ export const drawShape = (canvasContext,updatedShape,state) =>{
   }
 
 
-export const drawNextShape = (canvasContext,initShape,state) =>{
+export const drawNextShape = (canvasContext,initiailizedShape,state) =>{
     clearCanvas(canvasContext,state)
-    const canvasWidth = state.canvasWidth/2
-    const canvasHeight = state.canvasHeight/4
-    const initiailizedShape ={}
-    initiailizedShape.name = initShape[0]
-    initiailizedShape.unitVertices = tetrisShapes[initShape[0]].vertices
-    initiailizedShape.unitBlockSize = state.activeShape.unitBlockSize
- 
-    initiailizedShape.xPosition = canvasWidth/2 
-    initiailizedShape.yPosition = canvasHeight/2
+    const canvasWidth = state.canvas.canvasMinor.width
+    const canvasHeight = state.canvas.canvasMinor.height
+    let specialshapes=false
+    if(initiailizedShape.name !== 'shapeI' && initiailizedShape.name !== 'shapeO'){
+        initiailizedShape.xPosition = canvasWidth/2 
+        initiailizedShape.yPosition = canvasHeight/2
+    }
+    else{
+        specialshapes=true
+        initiailizedShape.xPosition = canvasWidth/2 + initiailizedShape.unitBlockSize/2
+        initiailizedShape.yPosition = initiailizedShape.yPosition + canvasHeight/2 - initiailizedShape.unitBlockSize/2
+    }
+    
     
     drawShape(canvasContext,initiailizedShape)
-    shapeLocator(canvasContext,canvasWidth,canvasHeight,initiailizedShape,true)
-    //console.log(initiailizedShape,locatedShape)
+    shapeLocator(canvasContext,canvasWidth,canvasHeight,initiailizedShape,false,specialshapes)
 }
 //clear canvas
 export const clearCanvas = (canvasContext,state)=>{
-    canvasContext.clearRect(0, 0, state.canvasWidth, state.canvasHeight);
+    canvasContext.clearRect(0, 0, state.canvas.canvasMajor.width, state.canvas.canvasMajor.height);
 }
 
 const drawRuble = (canvasContext,activeShape,state) =>{
@@ -82,7 +98,7 @@ export const winRubble = (canvasContext,activeShape,state,winners) =>{
             canvasContext.stroke();
         }
     })
-    const blocksPerRow = state.canvasWidth /b
+    const blocksPerRow = state.canvas.canvasMajor.width /b
     winners.forEach((y)=>{
         for(let x=0;x<blocksPerRow;x++){
              //filled rects
