@@ -95,7 +95,7 @@ const Leaderboard = () => (
           .sort((a, b) => b.bestScore - a.bestScore)
           .filter((dummy, index) => index < 10)
           .map(x => (
-            <div key={x.name} className="leaderboard-player">
+            <div key={x.username} className="leaderboard-player">
               <p>{x.username}</p>
               <p>{x.bestScore}</p>
             </div>
