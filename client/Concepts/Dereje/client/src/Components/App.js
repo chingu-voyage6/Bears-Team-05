@@ -18,7 +18,14 @@ class App extends Component{
   componentWillUnmount() {
     this.endTick('componentWillUnmount')
   }
-
+  componentDidUpdate(prevProps,prevState){
+   if((this.state.points.level !== prevState.points.level) && (this.state.timerInterval > 250)) {
+     this.endTick('Level Change')
+     this.setState({
+        timerInterval: this.state.timerInterval -150
+     },()=>this.startTick())
+   }
+  }
   resetBoard =() =>{ //clear and restart
     const canvasMajor = this.refs.canvasMajor
     const canvasMinor = this.refs.canvasMinor
@@ -32,8 +39,8 @@ class App extends Component{
     //set bottom boundary by occupying cells
     if(!initialState.rubble.boundaryCells.length){
       const b = this.state.activeShape.unitBlockSize
-      const blocksPerRow = this.state.canvasWidth / b
-      const blocksPerColumn = this.state.canvasHeight / b
+      const blocksPerRow = this.state.canvas.canvasMajor.width / b
+      const blocksPerColumn = this.state.canvas.canvasMajor.height / b
       for(let i=0; i< blocksPerRow;i++){
         initialState.rubble.boundaryCells.push(i+'-'+blocksPerColumn)
       }
@@ -44,7 +51,7 @@ class App extends Component{
     const randomShape = this.state.nextShape ? this.initializeShape(this.state.nextShape) : this.initializeShape(this.getRandShapeName())
     const nextShape = this.getRandShapeName()
     const nextShapeInfo = this.initializeShape(nextShape)
-    
+    //nextShapeInfo.yPosition = -1*nextShapeInfo.boundingBox[2]
     this.setState({
       nextShape: nextShape
     },()=>drawNextShape(this.canvasContextMinor,nextShapeInfo,this.state))
@@ -52,15 +59,13 @@ class App extends Component{
     let copyOfActiveShape = Object.assign({},this.state.activeShape)
     //I and O shapes need right offset
     if(randomShape[0] !== 'shapeI' && randomShape[0] !== 'shapeO'){
-      copyOfActiveShape.xPosition = (this.state.canvasWidth/2) + this.state.activeShape.unitBlockSize/2
+      copyOfActiveShape.xPosition = (this.state.canvas.canvasMajor.width/2) + this.state.activeShape.unitBlockSize/2
     }
     else{
-      copyOfActiveShape.xPosition = (this.state.canvasWidth/2)
+      copyOfActiveShape.xPosition = (this.state.canvas.canvasMajor.width/2)
     }
-    copyOfActiveShape.name = randomShape[0]
-    copyOfActiveShape.yPosition = -1*randomShape[1]
-    copyOfActiveShape.rotationStage = 0
-    copyOfActiveShape.unitVertices = tetrisShapes[copyOfActiveShape.name].vertices
+    copyOfActiveShape = randomShape
+    copyOfActiveShape.yPosition = -1*randomShape.boundingBox[2]
 
     this.updateScreen(copyOfActiveShape)
   }
@@ -102,7 +107,7 @@ class App extends Component{
   }
 
   screenMatrix = () => {//sweep playable area
-    const locatedShape = shapeLocator(this.canvasContextMajor,this.state.canvasWidth,this.state.canvasHeight,this.state.activeShape)
+    const locatedShape = shapeLocator(this.canvasContextMajor,this.state.canvas.canvasMajor.width,this.state.canvas.canvasMajor.height,this.state.activeShape,false)
     const testCollision = this.collisionCheck(locatedShape)
     //if no collison store cell coordinates in state for future comparison
     if(!testCollision){
@@ -118,15 +123,24 @@ class App extends Component{
     return shapeList[randNum]
   }
   initializeShape = (shapeName) =>{
-    
     //finding intital y bound so it does not get cutoff 
-    const pickedShape = shapeName
-    const x = (pickedShape !== 'shapeI' && pickedShape !== 'shapeO') ? this.state.canvasWidth/2 + this.state.activeShape.unitBlockSize/2 : this.state.canvasWidth/2
-    const initialScaledVertices = tetrisShapes.getAbsoluteVertices(this.state.activeShape.unitBlockSize,x,0,tetrisShapes[pickedShape].vertices)
+    let x = (shapeName !== 'shapeI' && shapeName !== 'shapeO') ? this.state.canvas.canvasMajor.width/2 + this.state.activeShape.unitBlockSize/2 : this.state.canvas.canvasMajor.width/2
+
+    const initialAbsoluteVertices = tetrisShapes.getAbsoluteVertices(this.state.activeShape.unitBlockSize,x,0,tetrisShapes[shapeName].vertices)
     
-    const initialBoundingBox = tetrisShapes.onBoundingBox(initialScaledVertices)
-    
-    return [pickedShape,initialBoundingBox[2]]
+    const initialBoundingBox = tetrisShapes.onBoundingBox(initialAbsoluteVertices)
+    const activeShape ={
+      name:shapeName,
+      unitBlockSize:30,
+      xPosition:x,
+      yPosition:0,
+      unitVertices:tetrisShapes[shapeName].vertices,
+      absoluteVertices:initialAbsoluteVertices,
+      boundingBox:initialBoundingBox,
+      rotationStage:0,
+      cells:[],
+    }
+    return activeShape
   }
 
   collisionCheck = (testShape) =>{
@@ -142,24 +156,21 @@ class App extends Component{
       }
       //retreive total rows cleared (if any) and test for time interval reduction
       const rowsCleared = collisionResult[1] ? collisionResult[1].length : 0
-      const reduceTimeinterval = ((this.state.points.linesCleared + rowsCleared) > this.state.points.levelUp && this.state.timerInterval > 250) ? true : false
       //assign points if winner found
-      copyOfPoints.linesCleared = reduceTimeinterval ? 0 : this.state.points.linesCleared + rowsCleared
-      copyOfPoints.totalLinesCleared = rowsCleared ? this.state.points.totalLinesCleared  + rowsCleared: this.state.points.totalLinesCleared
+      copyOfPoints.totalLinesCleared = this.state.points.totalLinesCleared  + rowsCleared
+      copyOfPoints.level = Math.floor(copyOfPoints.totalLinesCleared/(this.state.points.levelUp))
       //assign new rubble coordinates
       copyOfRubble.occupiedCells = collisionResult[0]
       copyOfRubble.winRows = collisionResult[1]
       if(rowsCleared){//winner found
         //end tick to play animation and start tick back after animation is over
         this.endTick('collision check - winning row')
-        console.log('reduce Interval, ', reduceTimeinterval )
         clearCanvas(this.canvasContextMajor,this.state) //clear canvasMajor
         winRubble(this.canvasContextMajor,this.state.activeShape,this.state,collisionResult[1])
         const inter = setTimeout(() => {
           this.setState({
             rubble:copyOfRubble,
             points: copyOfPoints,
-            timerInterval: reduceTimeinterval ? this.state.timerInterval - 150 : this.state.timerInterval
             },()=>this.startTick())
             clearInterval(inter)
         }, 250);
@@ -194,7 +205,7 @@ class App extends Component{
     
       //check X boundaries 
       const leftOutOfBound = left && (this.state.activeShape.boundingBox[0] - this.state.activeShape.unitBlockSize) < 0
-      const rightOutOfBound = right && (this.state.activeShape.boundingBox[1] + this.state.activeShape.unitBlockSize) > this.state.canvasWidth
+      const rightOutOfBound = right && (this.state.activeShape.boundingBox[1] + this.state.activeShape.unitBlockSize) > this.state.canvas.canvasMajor.width
       if(leftOutOfBound || rightOutOfBound) return
 
       let copyOfActiveShape = Object.assign({},this.state.activeShape)
@@ -209,20 +220,35 @@ class App extends Component{
         this.updateScreen(copyOfActiveShape)
       }
       else if(down) this.tick()
-      else this.rotation()
+      else this.rotation(this.state.activeShape)
     }
 
-  rotation = () =>{
-      let copyOfActiveShape = Object.assign({},this.state.activeShape)
-      copyOfActiveShape.unitVertices = tetrisShapes.onRotate(copyOfActiveShape.unitVertices)
-      copyOfActiveShape.rotationStage = copyOfActiveShape.rotationStage > 2 ? 0 : copyOfActiveShape.rotationStage + 1
-      const boundingBox = tetrisShapes.onBoundingBox(tetrisShapes.getAbsoluteVertices(this.state.activeShape.unitBlockSize,this.state.activeShape.xPosition,this.state.activeShape.yPosition,copyOfActiveShape.unitVertices))
+  rotation = (active) =>{
+      const unitVerticesAfterRotation = tetrisShapes.onRotate(active.unitVertices)
+      const boundingBox = tetrisShapes.onBoundingBox(tetrisShapes.getAbsoluteVertices(this.state.activeShape.unitBlockSize,this.state.activeShape.xPosition,this.state.activeShape.yPosition,unitVerticesAfterRotation))
+      const absoluteVertices = tetrisShapes.getAbsoluteVertices(this.state.activeShape.unitBlockSize,this.state.activeShape.xPosition,this.state.activeShape.yPosition,unitVerticesAfterRotation)
 
-      if(boundingBox[0]<0 || boundingBox[1]>this.state.canvasWidth){
-        return
+      let rotatedShape = Object.assign({},this.state.activeShape)
+      rotatedShape.unitVertices = unitVerticesAfterRotation
+      rotatedShape.rotationStage = rotatedShape.rotationStage > 2 ? 0 : rotatedShape.rotationStage + 1
+      rotatedShape.cells=[]
+      rotatedShape.absoluteVertices = absoluteVertices
+      rotatedShape.boundingBox = boundingBox
+
+      //crude wall kicks, ideally should translate with a recursive function
+      if(boundingBox[0]<0 || boundingBox[1]>this.state.canvas.canvasMajor.width){ //side wall kicks
+        const translateUnits = this.state.activeShape.name === 'shapeI' ? 2 : 1
+        if(boundingBox[0]<0){//translate to the left 
+          rotatedShape.xPosition = rotatedShape.xPosition + (translateUnits*this.state.activeShape.unitBlockSize)
+        }
+        else{//translate to the right
+          rotatedShape.xPosition = rotatedShape.xPosition - (translateUnits*this.state.activeShape.unitBlockSize)
+        }
       }
-      this.updateScreen(copyOfActiveShape)
-    }
+      //locate shape to check collision on rotation, if collision detected do not rotate shape
+      const locatedShape = shapeLocator(this.canvasContextMajor,this.state.canvas.canvasMajor.width,this.state.canvas.canvasMajor.height,rotatedShape,false)
+      if(!runCollision(this.state,locatedShape))this.updateScreen(rotatedShape)
+  }
   getSideBlock = (direction)=>{
     const cellCheck = this.state.activeShape.cells.map((c)=>{
       if(direction === 'L'){
@@ -245,15 +271,15 @@ class App extends Component{
         <div className ='controls'>
         <canvas
         ref="canvasMinor" 
-        width={this.state.canvasWidth/2} 
-        height={this.state.canvasHeight/4} 
+        width={this.state.canvas.canvasMinor.width} 
+        height={this.state.canvas.canvasMinor.height} 
         tabIndex="0"
         />
           <button className="reset" onClick={()=>this.resetBoard()}>
             Reset
           </button>
           <label htmlFor="test">Lines Cleared = {this.state.points.totalLinesCleared}</label>
-          <label htmlFor="test">Level = {Math.floor(this.state.points.totalLinesCleared/(this.state.points.levelUp+1))}</label>
+          <label htmlFor="test">Level = {this.state.points.level}</label>
           <label>
             Pause:
             <input
@@ -265,8 +291,8 @@ class App extends Component{
         </div>
         <canvas 
         ref="canvasMajor" 
-        width={this.state.canvasWidth} 
-        height={this.state.canvasHeight} 
+        width={this.state.canvas.canvasMajor.width} 
+        height={this.state.canvas.canvasMajor.height} 
         tabIndex="0"
         onKeyDown={(e)=>this.playerMoves(e)}
         />
@@ -276,15 +302,23 @@ class App extends Component{
 }
 
 const initialState={ //determine what needs to go into state, a very small portion here
-  canvasWidth:300,
-  canvasHeight:600,
   timerInterval:700,
   paused:false,
   nextShape:'',
+  canvas:{
+    canvasMajor:{
+      width:300,
+      height:600,
+    },
+    canvasMinor:{
+      width:210,
+      height:150,
+    }
+  },
   points:{
-    linesCleared:0,
     totalLinesCleared:0,
-    levelUp:4
+    level:0,
+    levelUp:5
   },
   rubble:{// all screen info of rubble
     occupiedCells:[],
