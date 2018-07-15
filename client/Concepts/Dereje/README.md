@@ -9,6 +9,13 @@ https://dereje1.github.io/React-Canvas-Playground/
 > yarn
 > yarn start
 ```
+
+## Installation (Integration Mode)
+```
+> cd App_Integration
+> yarn
+> yarn start
+```
 See initial concept here
 
 https://codepen.io/Dee73/full/KeRYqV/
