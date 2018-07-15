@@ -1,4 +1,5 @@
-import { INITIALIZE_GAME } from '../constants/index';
+import { INITIALIZE_GAME, LEVEL_UP, PAUSE,
+  GET_NEXT_SHAPE, SCREEN_UPDATE, LOCATE_SHAPE, CLEAR_ROWS } from '../constants/index';
 
 
 const initialState = { // determine what needs to go into state, a very small portion here
@@ -38,10 +39,50 @@ const initialState = { // determine what needs to go into state, a very small po
   },
 };
 
-const gameReset = () => (
+export const gameReset = () => (
   {
     type: INITIALIZE_GAME,
     payload: initialState,
   }
 );
-export default gameReset;
+
+export const speedUp = () => (
+  {
+    type: LEVEL_UP,
+    payload: 150,
+  }
+);
+
+export const pause = () => (
+  {
+    type: PAUSE,
+  }
+);
+
+export const nextShape = shape => (
+  {
+    type: GET_NEXT_SHAPE,
+    payload: shape,
+  }
+);
+
+export const updateScreen = data => (
+  {
+    type: SCREEN_UPDATE,
+    payload: data,
+  }
+);
+
+export const locateShape = locatedShape => (
+  {
+    type: LOCATE_SHAPE,
+    payload: locatedShape,
+  }
+);
+
+export const clearRows = data => (
+  {
+    type: CLEAR_ROWS,
+    payload: data,
+  }
+);

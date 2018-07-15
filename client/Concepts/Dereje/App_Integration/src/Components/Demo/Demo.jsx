@@ -5,7 +5,8 @@ import './Demo.css';
 // connect to redux and get action creators
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
-import gameReset from '../../Actions/tetris';
+import { gameReset, speedUp, pause, nextShape,
+  updateScreen, locateShape, clearRows } from '../../Actions/tetris';
 
 // custom functions
 import tetrisShapes from './scripts/shapes';
@@ -20,6 +21,12 @@ const mapStateToProps = state => state;
 const mapDispatchToProps = dispatch => ({
   actions: bindActionCreators({
     gameReset,
+    speedUp,
+    pause,
+    nextShape,
+    updateScreen,
+    locateShape,
+    clearRows,
   }, dispatch),
 });
 
@@ -64,9 +71,10 @@ class Demo extends React.Component {
     const randNum = Math.floor(Math.random() * (shapeList.length));
     return shapeList[randNum];
   }
-  speedUp = () => {
+  speedUp = async () => {
+    await this.props.actions.speedUp();
     this.setState({
-      timerInterval: this.state.timerInterval - 150,
+      timerInterval: this.props.game.timerInterval,
     }, () => this.startTick());
   }
   resetBoard = async () => { // clear and restart
@@ -93,14 +101,15 @@ class Demo extends React.Component {
     this.setState(initialState, () => this.startTick());
   }
 
-  newShape = () => {
+  newShape = async () => {
     const randomShape = this.state.nextShape ? this.initializeShape(this.state.nextShape) :
       this.initializeShape(this.getRandShapeName());
-    const nextShape = this.getRandShapeName();
-    const nextShapeInfo = this.initializeShape(nextShape);
+    await this.props.actions.nextShape(this.getRandShapeName());
+    const ns = this.props.game.nextShape;
+    const nextShapeInfo = this.initializeShape(ns);
 
     this.setState({
-      nextShape,
+      nextShape: ns,
     }, () => drawNextShape(this.canvasContextMinor, nextShapeInfo, this.state));
 
     let copyOfActiveShape = Object.assign({}, this.state.activeShape);
@@ -124,7 +133,7 @@ class Demo extends React.Component {
       this.tick();
     }, this.state.timerInterval);
   }
-  endTick = (c) => {
+  endTick = async (c) => {
     this.abortCounter += 1;
     console.log(`Called by ${c} , attempts = ${this.abortCounter}`);
     clearInterval(this.downInterval);
@@ -141,19 +150,25 @@ class Demo extends React.Component {
     this.updateScreen(copyOfActiveShape);
   }
 
-  updateScreen = (updatedShape) => {
+  updateScreen = async (updatedShape) => {
     clearCanvas(this.canvasContextMajor, this.state); // clear canvasMajor
     const drawReturn = drawShape(this.canvasContextMajor, updatedShape, this.state);
     const copyOfRubble = Object.assign({}, this.state.rubble);
     copyOfRubble.winRows = null; // need to reset back to null incase of previous win
-    this.setState({
+    const data = {
       activeShape: drawReturn,
       rubble: copyOfRubble,
       paused: false,
+    };
+    await this.props.actions.updateScreen(data);
+    this.setState({
+      activeShape: this.props.game.activeShape,
+      rubble: this.props.game.rubble,
+      paused: this.props.game.paused,
     }, () => this.screenMatrix());
   }
 
-  screenMatrix = () => { // sweep playable area
+  screenMatrix = async () => { // sweep playable area
     const locatedShape = shapeLocator(
       this.canvasContextMajor,
       this.state.canvas.canvasMajor.width,
@@ -163,8 +178,9 @@ class Demo extends React.Component {
     const testCollision = this.collisionCheck(locatedShape);
     // if no collison store cell coordinates in state for future comparison
     if (!testCollision) {
+      await this.props.actions.locateShape(locatedShape);
       this.setState({
-        activeShape: locatedShape,
+        activeShape: this.props.game.activeShape,
       });
     }
   }
@@ -239,10 +255,11 @@ class Demo extends React.Component {
     }
     return null;
   }
-  handlePause = () => {
+  handlePause = async () => {
+    await this.props.actions.pause();
     this.canvasMajor.current.focus();
     this.setState({
-      paused: !this.state.paused,
+      paused: this.props.game.paused,
     });
   }
   /* handle all player movements below */
@@ -325,6 +342,8 @@ class Demo extends React.Component {
 
   render() {
     if (!Object.keys(this.props.game).length) return null;
+    const LC = (this.state.points) ? (this.state.points.totalLinesCleared) : 0;
+    const lvl = (this.state.points) ? (this.state.points.level) : 0;
     return (
       <div className="democontainer">
         <div className="controls">
@@ -337,8 +356,8 @@ class Demo extends React.Component {
           <button className="reset" onClick={() => this.resetBoard()}>
             Reset
           </button>
-          <label htmlFor="test">Lines Cleared = {this.props.game.points.totalLinesCleared}</label>
-          <label htmlFor="test">Level = {this.props.game.points.level}</label>
+          <label htmlFor="test">Lines Cleared = {LC}</label>
+          <label htmlFor="test">Level = {lvl}</label>
           <label htmlFor="test">
             Pause:
             <input
@@ -370,6 +389,12 @@ Demo.defaultProps = {
 Demo.propTypes = {
   actions: PropTypes.shape({
     gameReset: PropTypes.func,
+    speedUp: PropTypes.func,
+    pause: PropTypes.func,
+    nextShape: PropTypes.func,
+    updateScreen: PropTypes.func,
+    locateShape: PropTypes.func,
+    clearRows: PropTypes.func,
   }),
   game: PropTypes.objectOf(PropTypes.any),
 };
