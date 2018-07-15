@@ -5,6 +5,7 @@ module.exports = {
     'USER_DISCONNECTED',
   ],
   GET_USER_STATUS: 'GET_USER_STATUS',
+  INITIALIZE_GAME: 'INITIALIZE_GAME',
   serverUrl: () => process.env.SERVER_URL || 'http://localhost:5000',
   clientUrl: () => process.env.CLIENT_URL || 'http://localhost:3000',
 };

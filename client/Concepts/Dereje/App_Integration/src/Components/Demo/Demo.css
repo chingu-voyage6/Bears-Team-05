@@ -1,9 +1,8 @@
-body{
-  padding-top: 20px;
-}
+
 .democontainer{
   display:flex;
   justify-content: center;
+  margin:auto;
 }
 
 .controls{

@@ -1,10 +1,11 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import './Demo.css';
 
 // connect to redux and get action creators
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
-import { getUser } from '../../Actions/authentication';
+import gameReset from '../../Actions/tetris';
 
 // custom functions
 import tetrisShapes from './scripts/shapes';
@@ -18,59 +19,25 @@ const mapStateToProps = state => state;
 // writes to store
 const mapDispatchToProps = dispatch => ({
   actions: bindActionCreators({
-    getUser,
+    gameReset,
   }, dispatch),
 });
 
 // end redux
-const initialState = { // determine what needs to go into state, a very small portion here
-  timerInterval: 700,
-  paused: false,
-  nextShape: '',
-  canvas: {
-    canvasMajor: {
-      width: 300,
-      height: 600,
-    },
-    canvasMinor: {
-      width: 210,
-      height: 150,
-    },
-  },
-  points: {
-    totalLinesCleared: 0,
-    level: 0,
-    levelUp: 5,
-  },
-  rubble: {// all screen info of rubble
-    occupiedCells: [],
-    winRows: null,
-    boundaryCells: [],
-  },
-  activeShape: {// all geometric info of active shape
-    name: 'shapeZ',
-    unitBlockSize: 30,
-    xPosition: 0,
-    yPosition: 0,
-    unitVertices: [],
-    absoluteVertices: [],
-    boundingBox: [],
-    rotationStage: 0,
-    cells: [],
-  },
-};
 class Demo extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = initialState;
+    this.state = {};
     this.canvasMajor = React.createRef();
     this.canvasMinor = React.createRef();
   }
   componentDidMount() {
     this.resetBoard();
   }
+
   componentDidUpdate(prevProps, prevState) {
+    if (!Object.keys(prevState).length) return;
     if ((this.state.points.level !== prevState.points.level) && (this.state.timerInterval > 250)) {
       this.endTick('Level Change');
       this.speedUp();
@@ -102,7 +69,9 @@ class Demo extends React.Component {
       timerInterval: this.state.timerInterval - 150,
     }, () => this.startTick());
   }
-  resetBoard =() => { // clear and restart
+  resetBoard = async () => { // clear and restart
+    await this.props.actions.gameReset();
+    const initialState = this.props.game;
     const canvasMajor = this.canvasMajor.current;
     const canvasMinor = this.canvasMinor.current;
     canvasMajor.focus();
@@ -114,9 +83,9 @@ class Demo extends React.Component {
     if (this.downInterval) this.endTick('reset Board');
     // set bottom boundary by occupying cells
     if (!initialState.rubble.boundaryCells.length) {
-      const b = this.state.activeShape.unitBlockSize;
-      const blocksPerRow = this.state.canvas.canvasMajor.width / b;
-      const blocksPerColumn = this.state.canvas.canvasMajor.height / b;
+      const b = initialState.activeShape.unitBlockSize;
+      const blocksPerRow = initialState.canvas.canvasMajor.width / b;
+      const blocksPerColumn = initialState.canvas.canvasMajor.height / b;
       for (let i = 0; i < blocksPerRow; i += 1) {
         initialState.rubble.boundaryCells.push(`${i}-${blocksPerColumn}`);
       }
@@ -355,20 +324,21 @@ class Demo extends React.Component {
 
 
   render() {
+    if (!Object.keys(this.props.game).length) return null;
     return (
       <div className="democontainer">
         <div className="controls">
           <canvas
             ref={this.canvasMinor}
-            width={this.state.canvas.canvasMinor.width}
-            height={this.state.canvas.canvasMinor.height}
+            width={this.props.game.canvas.canvasMinor.width}
+            height={this.props.game.canvas.canvasMinor.height}
             tabIndex="0"
           />
           <button className="reset" onClick={() => this.resetBoard()}>
             Reset
           </button>
-          <label htmlFor="test">Lines Cleared = {this.state.points.totalLinesCleared}</label>
-          <label htmlFor="test">Level = {this.state.points.level}</label>
+          <label htmlFor="test">Lines Cleared = {this.props.game.points.totalLinesCleared}</label>
+          <label htmlFor="test">Level = {this.props.game.points.level}</label>
           <label htmlFor="test">
             Pause:
             <input
@@ -381,8 +351,8 @@ class Demo extends React.Component {
         </div>
         <canvas
           ref={this.canvasMajor}
-          width={this.state.canvas.canvasMajor.width}
-          height={this.state.canvas.canvasMajor.height}
+          width={this.props.game.canvas.canvasMajor.width}
+          height={this.props.game.canvas.canvasMajor.height}
           tabIndex="0"
           onKeyDown={e => this.playerMoves(e)}
         />
@@ -392,5 +362,16 @@ class Demo extends React.Component {
 
 }
 
+Demo.defaultProps = {
+  actions: {},
+  game: {},
+};
+
+Demo.propTypes = {
+  actions: PropTypes.shape({
+    gameReset: PropTypes.func,
+  }),
+  game: PropTypes.objectOf(PropTypes.any),
+};
 
 export default connect(mapStateToProps, mapDispatchToProps)(Demo);
