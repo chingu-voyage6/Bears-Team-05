@@ -1,4 +1,4 @@
-import { tetrisShapes } from './shapes';
+import tetrisShapes from './shapes';
 import shapeLocator from './locateShape';
 
 export const drawGrid = (x, y, occupied, b, ctx) => {

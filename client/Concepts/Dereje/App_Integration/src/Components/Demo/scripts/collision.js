@@ -1,4 +1,4 @@
-import { tetrisShapes } from './shapes';
+import tetrisShapes from './shapes';
 
 
 const winCheck = (newOccupied, state) => {
