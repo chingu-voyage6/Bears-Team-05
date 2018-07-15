@@ -356,7 +356,7 @@ class Demo extends React.Component {
 
   render() {
     return (
-      <div className="container">
+      <div className="democontainer">
         <div className="controls">
           <canvas
             ref={this.canvasMinor}

@@ -1,9 +1,9 @@
 body{
   padding-top: 20px;
 }
-.container{
+.democontainer{
   display:flex;
-  justify-content: space-around
+  justify-content: center;
 }
 
 .controls{
@@ -12,13 +12,16 @@ body{
   justify-content: space-around;
   align-items: center;
   width:auto;
+  background: grey;
+  margin-right: 5%;
+  color: rgb(167, 232, 94);
 }
 .reset {
+  border-radius: 10px;
   margin-top:10px;
-  margin-right: 20px;
   height:50px;
   font-size:25px;
-  width:auto;
+  width:80%;
   cursor:pointer;
   }
   

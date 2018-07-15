@@ -13,13 +13,12 @@ export const drawGrid = (x, y, occupied, b, ctx) => {
 export const drawGridSpecial = (x, y, occupied, b, ctx) => {
   const canvasContext = ctx;
   if (x === 0) {
-    const col = occupied ? 'grey' : 'white';
     canvasContext.beginPath();
     canvasContext.lineWidth = '3';
-    canvasContext.strokeStyle = col;
+    canvasContext.strokeStyle = 'black';
     canvasContext.rect(x, y, b, b);
     canvasContext.stroke();
-    canvasContext.fillStyle = 'white';
+    canvasContext.fillStyle = 'black';
     canvasContext.rect(x, y, b, b);
     canvasContext.fill();
   }
