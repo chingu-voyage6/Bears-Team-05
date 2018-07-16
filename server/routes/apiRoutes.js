@@ -42,7 +42,7 @@ router.get('/profile', isLoggedIn, getUserProfile);
 
 router.get('/leaderboard', getLeaderboard);
 
-router.get('/my_results/:playerId', getPlayersRecentMatches);
+router.get('/my_results', isLoggedIn, getPlayersRecentMatches);
 
 // Development route - seeds DB with fake matches
 router.get('/seed_matches', seedMatches);
