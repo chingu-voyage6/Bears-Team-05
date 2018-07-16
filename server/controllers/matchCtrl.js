@@ -16,7 +16,7 @@ const { ObjectId } = require('mongoose').Types;
  * multi-player matches
 */
 const getPlayersRecentMatches = (req, res) => {
-  const { playerId } = req.params;
+  const { playerId } = req.user._id;
   const limit = parseInt(req.query.limit, 10) || 10;
 
   Match.aggregate([
@@ -36,7 +36,7 @@ const getPlayersRecentMatches = (req, res) => {
     },
     {
       $project: {
-        'matches._id': 0,
+        // 'matches._id': 0,
         'matches.multiPlayer': 0,
         'matches.updatedAt': 0,
         'matches.__v': 0,
