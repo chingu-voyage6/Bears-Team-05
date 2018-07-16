@@ -2,7 +2,10 @@
 
 const router = require('express').Router();
 const { getUserProfile } = require('../controllers/profileCtrl');
-const { getLeaderboard } = require('../controllers/matchCtrl');
+const {
+  getLeaderboard,
+  getPlayersRecentMatches,
+} = require('../controllers/matchCtrl');
 const { seedMatches } = require('../controllers/dbSeed');
 
 /* =============================== MIDDLEWARE ============================== */
@@ -38,6 +41,8 @@ const isLoggedIn = (req, res, next) => {
 router.get('/profile', isLoggedIn, getUserProfile);
 
 router.get('/leaderboard', getLeaderboard);
+
+router.get('/my_results/:playerId', getPlayersRecentMatches);
 
 // Development route - seeds DB with fake matches
 router.get('/seed_matches', seedMatches);
