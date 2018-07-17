@@ -25,6 +25,7 @@ module.exports = {
       { 'SwitchCase': 1 }
     ],
     'no-console': 0,
+    'no-underscore-dangle': ["error", { "allow": ["_id"] }],
     'padded-blocks': ['error', {
       'blocks': 'never',
       'classes': 'always',
