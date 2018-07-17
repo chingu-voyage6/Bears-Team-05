@@ -8,7 +8,6 @@ import {
 export const socket = io(serverUrl());
 
 export const initSocket = (dispatch) => {
-  console.log('hello')
   socket.on('connect', () => {
     console.log('welcome to Tetris!');
   });

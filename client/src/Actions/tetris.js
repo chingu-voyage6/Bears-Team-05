@@ -1,5 +1,7 @@
-import { INITIALIZE_GAME, LEVEL_UP, PAUSE,
-  GET_NEXT_SHAPE, SCREEN_UPDATE, LOCATE_SHAPE, COLLISION } from '../constants/index';
+import {
+  INITIALIZE_GAME, LEVEL_UP, PAUSE,
+  GET_NEXT_SHAPE, SCREEN_UPDATE, LOCATE_SHAPE, COLLISION,
+} from '../constants/index';
 
 
 const initializeBoundry = (unitBlockSize, width, height) => {

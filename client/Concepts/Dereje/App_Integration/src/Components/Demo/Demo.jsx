@@ -11,7 +11,7 @@ import { gameReset, nextShape, updateScreen,
 // custom functions
 import tetrisShapes from './scripts/shapes';
 import shapeLocator from './scripts/locateShape';
-import runCollision from './scripts//collision';
+import runCollision from './scripts/collision';
 import { clearCanvas, drawShape, winRubble, drawNextShape } from './scripts/canvas';
 
 // reads from store
@@ -100,19 +100,38 @@ class Demo extends React.Component {
     await this.props.actions.nextShape(newShape);
     drawNextShape(this.canvasContextMinor, nextShapeInfo, this.props.game);
 
-    let copyOfActiveShape = Object.assign({}, this.props.game.activeShape);
-    // I and O shapes need right offset
-    if (randomShape[0] !== 'shapeI' && randomShape[0] !== 'shapeO') {
-      copyOfActiveShape.xPosition = (this.props.game.canvas.canvasMajor.width / 2) +
-      (this.props.game.activeShape.unitBlockSize / 2);
-    } else {
-      copyOfActiveShape.xPosition = (this.props.game.canvas.canvasMajor.width / 2);
-    }
-    copyOfActiveShape = randomShape;
-    copyOfActiveShape.yPosition = -1 * randomShape.boundingBox[2];
-
-    this.updateScreen(copyOfActiveShape);
+    this.updateScreen(randomShape);
   }
+
+  initializeShape = (shapeName) => {
+    // finding intital y bound so it does not get cutoff
+    const x = (shapeName !== 'shapeI' && shapeName !== 'shapeO') ?
+      (this.props.game.canvas.canvasMajor.width / 2) +
+      (this.props.game.activeShape.unitBlockSize / 2) :
+      this.props.game.canvas.canvasMajor.width / 2;
+
+    const initialAbsoluteVertices = tetrisShapes.getAbsoluteVertices(
+      this.props.game.activeShape.unitBlockSize,
+      x,
+      0,
+      tetrisShapes[shapeName].vertices,
+    );
+
+    const initialBoundingBox = tetrisShapes.onBoundingBox(initialAbsoluteVertices);
+    const activeShape = {
+      name: shapeName,
+      unitBlockSize: 30,
+      xPosition: x,
+      yPosition: -1 * initialBoundingBox[2],
+      unitVertices: tetrisShapes[shapeName].vertices,
+      absoluteVertices: initialAbsoluteVertices,
+      boundingBox: initialBoundingBox,
+      rotationStage: 0,
+      cells: [],
+    };
+    return activeShape;
+  }
+
   startTick = () => {
     this.abortCounter = 0;
     if (this.downInterval)clearInterval(this.downInterval);
@@ -161,35 +180,6 @@ class Demo extends React.Component {
   }
 
 
-  initializeShape = (shapeName) => {
-    // finding intital y bound so it does not get cutoff
-    const x = (shapeName !== 'shapeI' && shapeName !== 'shapeO') ?
-      (this.props.game.canvas.canvasMajor.width / 2) +
-      (this.props.game.activeShape.unitBlockSize / 2) :
-      this.props.game.canvas.canvasMajor.width / 2;
-
-    const initialAbsoluteVertices = tetrisShapes.getAbsoluteVertices(
-      this.props.game.activeShape.unitBlockSize,
-      x,
-      0,
-      tetrisShapes[shapeName].vertices,
-    );
-
-    const initialBoundingBox = tetrisShapes.onBoundingBox(initialAbsoluteVertices);
-    const activeShape = {
-      name: shapeName,
-      unitBlockSize: 30,
-      xPosition: x,
-      yPosition: 0,
-      unitVertices: tetrisShapes[shapeName].vertices,
-      absoluteVertices: initialAbsoluteVertices,
-      boundingBox: initialBoundingBox,
-      rotationStage: 0,
-      cells: [],
-    };
-    return activeShape;
-  }
-
   collisionCheck = async (testShape) => {
     const copyOfPoints = Object.assign({}, this.props.game.points);
     const copyOfRubble = Object.assign({}, this.props.game.rubble);
@@ -201,7 +191,7 @@ class Demo extends React.Component {
         this.endTick('collision check - game done');
         return 'done';
       }
-      // retreive total rows cleared (if any) and test for time interval reduction
+      // retreive total rows cleared (if any)
       const rowsCleared = collisionResult[1] ? collisionResult[1].length : 0;
       // assign points if winner found
       copyOfPoints.totalLinesCleared = this.props.game.points.totalLinesCleared + rowsCleared;
@@ -219,7 +209,6 @@ class Demo extends React.Component {
         clearCanvas(this.canvasContextMajor, this.props.game); // clear canvasMajor
         winRubble(
           this.canvasContextMajor,
-          this.props.game.activeShape,
           this.props.game,
           collisionResult[1],
         );
@@ -274,21 +263,11 @@ class Demo extends React.Component {
 
   rotation = (active) => {
     const unitVerticesAfterRotation = tetrisShapes.onRotate(active.unitVertices);
-    const boundingBox = tetrisShapes.onBoundingBox(tetrisShapes.getAbsoluteVertices(
-      this.props.game.activeShape.unitBlockSize,
-      this.props.game.activeShape.xPosition,
-      this.props.game.activeShape.yPosition,
-      unitVerticesAfterRotation,
-    ));
-    const absoluteVertices = tetrisShapes.getAbsoluteVertices(
-      this.props.game.activeShape.unitBlockSize,
-      this.props.game.activeShape.xPosition,
-      this.props.game.activeShape.yPosition,
-      unitVerticesAfterRotation,
-    );
-
-    const rotatedShape = Object.assign({}, this.props.game.activeShape);
+    const rotatedShape = Object.assign({}, active);
+    // assign new unit vertices and find bbox and absolutevertices
     rotatedShape.unitVertices = unitVerticesAfterRotation;
+    const [boundingBox, absoluteVertices] = tetrisShapes.getDims(rotatedShape);
+
     rotatedShape.rotationStage = rotatedShape.rotationStage > 2 ?
       0 :
       rotatedShape.rotationStage + 1;
@@ -296,7 +275,7 @@ class Demo extends React.Component {
     rotatedShape.absoluteVertices = absoluteVertices;
     rotatedShape.boundingBox = boundingBox;
 
-    // crude wall kicks, ideally should translate with a recursive function
+    // do crude wall kicks, ideally should translate with a recursive function
     if (
       boundingBox[0] < 0 ||
       boundingBox[1] > this.props.game.canvas.canvasMajor.width

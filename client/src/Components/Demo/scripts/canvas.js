@@ -88,9 +88,9 @@ export const drawNextShape = (ctx, newShape, state) => {
 };
 
 
-export const winRubble = (ctx, activeShape, state, winners) => {
+export const winRubble = (ctx, state, winners) => {
   const canvasContext = ctx;
-  const b = activeShape.unitBlockSize;
+  const b = state.activeShape.unitBlockSize;
   state.rubble.occupiedCells.forEach((cell) => {
     const [cellString, color] = cell;
     const x = Number(cellString.split('-')[0]);
