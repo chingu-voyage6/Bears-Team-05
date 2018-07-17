@@ -47,8 +47,11 @@ class Demo extends React.Component {
     if (Object.keys(prevProps.game).length) {
       if ((this.props.game.points.level !== prevProps.game.points.level) &&
           (this.props.game.timerInterval > 250)) {
-        this.endTick('Level Change');
-        this.speedUp();
+        const l = setTimeout(() => {
+          this.endTick('Level Change');
+          this.speedUp();
+          clearTimeout(l);
+        }, 250);
       }
     }
   }
