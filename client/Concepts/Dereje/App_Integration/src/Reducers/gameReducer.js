@@ -1,5 +1,5 @@
 import { INITIALIZE_GAME, LEVEL_UP, PAUSE,
-  GET_NEXT_SHAPE, SCREEN_UPDATE, LOCATE_SHAPE, CLEAR_ROWS } from '../constants/index';
+  GET_NEXT_SHAPE, SCREEN_UPDATE, LOCATE_SHAPE, COLLISION } from '../constants/index';
 
 const gameReducer = (state = {}, action) => {
   switch (action.type) {
@@ -11,7 +11,7 @@ const gameReducer = (state = {}, action) => {
       });
     case PAUSE:
       return Object.assign({}, state, {
-        paused: !state.paused,
+        paused: action.payload,
       });
     case GET_NEXT_SHAPE:
       return Object.assign({}, state, {
@@ -27,7 +27,7 @@ const gameReducer = (state = {}, action) => {
       return Object.assign({}, state, {
         activeShape: action.payload,
       });
-    case CLEAR_ROWS:
+    case COLLISION:
       return Object.assign({}, state, {
         rubble: action.payload.rubble,
         points: action.payload.points,

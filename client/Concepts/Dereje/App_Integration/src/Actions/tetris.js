@@ -1,7 +1,16 @@
 import { INITIALIZE_GAME, LEVEL_UP, PAUSE,
-  GET_NEXT_SHAPE, SCREEN_UPDATE, LOCATE_SHAPE, CLEAR_ROWS } from '../constants/index';
+  GET_NEXT_SHAPE, SCREEN_UPDATE, LOCATE_SHAPE, COLLISION } from '../constants/index';
 
 
+const initializeBoundry = (unitBlockSize, width, height) => {
+  const initialBoundry = [];
+  const blocksPerRow = width / unitBlockSize;
+  const blocksPerColumn = height / unitBlockSize;
+  for (let i = 0; i < blocksPerRow; i += 1) {
+    initialBoundry.push(`${i}-${blocksPerColumn}`);
+  }
+  return initialBoundry;
+};
 const initialState = { // determine what needs to go into state, a very small portion here
   timerInterval: 700,
   paused: false,
@@ -24,7 +33,6 @@ const initialState = { // determine what needs to go into state, a very small po
   rubble: {// all screen info of rubble
     occupiedCells: [],
     winRows: null,
-    boundaryCells: [],
   },
   activeShape: {// all geometric info of active shape
     name: 'shapeZ',
@@ -39,12 +47,20 @@ const initialState = { // determine what needs to go into state, a very small po
   },
 };
 
-export const gameReset = () => (
-  {
-    type: INITIALIZE_GAME,
-    payload: initialState,
-  }
-);
+
+export const gameReset = () => {
+  initialState.rubble.boundaryCells = initializeBoundry(
+    initialState.activeShape.unitBlockSize,
+    initialState.canvas.canvasMajor.width,
+    initialState.canvas.canvasMajor.height,
+  );
+  return (
+    {
+      type: INITIALIZE_GAME,
+      payload: initialState,
+    }
+  );
+};
 
 export const speedUp = () => (
   {
@@ -53,9 +69,10 @@ export const speedUp = () => (
   }
 );
 
-export const pause = () => (
+export const pause = status => (
   {
     type: PAUSE,
+    payload: status,
   }
 );
 
@@ -80,9 +97,9 @@ export const locateShape = locatedShape => (
   }
 );
 
-export const clearRows = data => (
+export const collide = data => (
   {
-    type: CLEAR_ROWS,
+    type: COLLISION,
     payload: data,
   }
 );

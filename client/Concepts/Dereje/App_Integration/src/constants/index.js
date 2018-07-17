@@ -11,7 +11,7 @@ module.exports = {
   GET_NEXT_SHAPE: 'GET_NEXT_SHAPE',
   SCREEN_UPDATE: 'SCREEN_UPDATE',
   LOCATE_SHAPE: 'LOCATE_SHAPE',
-  CLEAR_ROWS: 'CLEAR_ROWS',
+  COLLISION: 'COLLISION',
   serverUrl: () => process.env.SERVER_URL || 'http://localhost:5000',
   clientUrl: () => process.env.CLIENT_URL || 'http://localhost:3000',
 };
