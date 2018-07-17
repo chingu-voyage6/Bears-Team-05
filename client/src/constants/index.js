@@ -5,6 +5,13 @@ module.exports = {
     'USER_DISCONNECTED',
   ],
   GET_USER_STATUS: 'GET_USER_STATUS',
+  INITIALIZE_GAME: 'INITIALIZE_GAME',
+  LEVEL_UP: 'LEVEL_UP',
+  PAUSE: 'PAUSE',
+  GET_NEXT_SHAPE: 'GET_NEXT_SHAPE',
+  SCREEN_UPDATE: 'SCREEN_UPDATE',
+  LOCATE_SHAPE: 'LOCATE_SHAPE',
+  COLLISION: 'COLLISION',
   serverUrl: () => process.env.SERVER_URL || 'http://localhost:5000',
   clientUrl: () => process.env.CLIENT_URL || 'http://localhost:3000',
 };
