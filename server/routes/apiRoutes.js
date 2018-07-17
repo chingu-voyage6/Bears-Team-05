@@ -4,6 +4,7 @@ const router = require('express').Router();
 const { getUserProfile } = require('../controllers/profileCtrl');
 const {
   getLeaderboard,
+  getPlayersBestScores,
   getPlayersRecentMatches,
 } = require('../controllers/matchCtrl');
 const { seedMatches } = require('../controllers/dbSeed');
@@ -41,6 +42,8 @@ const isLoggedIn = (req, res, next) => {
 router.get('/profile', isLoggedIn, getUserProfile);
 
 router.get('/leaderboard', getLeaderboard);
+
+router.get('/best_scores', getPlayersBestScores);
 
 router.get('/my_results', isLoggedIn, getPlayersRecentMatches);
 
