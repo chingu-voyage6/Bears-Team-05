@@ -39,14 +39,14 @@ const getPlayersBestScores = (req, res, next) => {
 };
 
 /**
- * Get all player's recent match results
+ * Get single player's own recent match results
  * Example: GET >> /api/my_results?limit=20
  * Secured: yes
  * Expects:
  *    1) req.user._id      {String}   Player's user _id
  *    2) req.query.limit   {Number}   Qty of matches to return. Default: 10
  * Returns: JSON object with arrays for most-recent single &
- * multi-player matches
+ *    multi-player matches
 */
 const getPlayersRecentMatches = (req, res, next) => {
   if (!req.user || !req.user._id) {
