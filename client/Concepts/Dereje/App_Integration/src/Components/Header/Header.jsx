@@ -26,13 +26,13 @@ class Header extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      ready: false,
+      ready: true, // set back to false if server is back on
       loginStatus: 'Login',
     };
   }
   componentDidMount() {
     console.log('Header Mounted!');
-    this.props.actions.getUser();
+    this.props.actions.getUser(true);
   }
   componentDidUpdate(prevProps) {
     // once user info comes from cdm proceed to rendering
@@ -61,7 +61,7 @@ class Header extends React.Component {
             <NavLink to="/" exact><h1>Tetris Duel</h1></NavLink>
           </div>
           <div className="header__right">
-            <NavLink activeClassName="is-active" to="/demo">
+            <NavLink activeClassName="is-active" to="/Demo">
               Demo
             </NavLink>
             <NavLink activeClassName="is-active" to="/leaderboard">
