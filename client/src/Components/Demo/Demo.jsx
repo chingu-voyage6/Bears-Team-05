@@ -103,7 +103,7 @@ class Demo extends React.Component {
     await this.props.actions.nextShape(newShape);
     drawNextShape(this.canvasContextMinor, nextShapeInfo, this.props.game);
 
-    this.updateScreen(randomShape);
+    this.drawScreen(randomShape);
   }
 
   initializeShape = (shapeName) => {
@@ -155,10 +155,10 @@ class Demo extends React.Component {
     const copyOfActiveShape = Object.assign({}, this.props.game.activeShape);
     // console.log(`bbox @ tick ${this.props.game.activeShape.boundingBox}`)
     copyOfActiveShape.yPosition += this.props.game.activeShape.unitBlockSize;
-    this.updateScreen(copyOfActiveShape);
+    this.drawScreen(copyOfActiveShape);
   }
 
-  updateScreen = async (updatedShape) => {
+  drawScreen = async (updatedShape) => {
     clearCanvas(this.canvasContextMajor, this.props.game); // clear canvasMajor
     const drawReturn = drawShape(this.canvasContextMajor, updatedShape, this.props.game);
     const copyOfRubble = Object.assign({}, this.props.game.rubble);
@@ -168,32 +168,34 @@ class Demo extends React.Component {
       rubble: copyOfRubble,
       paused: false,
     };
-    await this.props.actions.updateScreen(data);
-    this.screenMatrix();
-  }
 
-  screenMatrix = () => { // sweep playable area
+    // Locate Shape on screen and then set .cell prop of activeShape
     const locatedShape = shapeLocator(
       this.canvasContextMajor,
       this.props.game.canvas.canvasMajor.width,
       this.props.game.canvas.canvasMajor.height,
-      this.props.game.activeShape, false,
+      drawReturn, false,
     );
-    this.collisionCheck(locatedShape);
-  }
 
+    // run collision
+    data.activeShape = locatedShape;
+    // test for collision and update shape
+    const collisionVal = await this.collisionCheck(locatedShape);
+    if (!collisionVal) await this.props.actions.updateScreen(data);
+  }
 
   collisionCheck = async (testShape) => {
     const copyOfPoints = Object.assign({}, this.props.game.points);
     const copyOfRubble = Object.assign({}, this.props.game.rubble);
     const collisionResult = runCollision(this.props.game, testShape);
-
+    let collisionFound = false;
     if (collisionResult) { // found collision
       // check if game space is all occupied
       if (collisionResult === 'done') {
         this.endTick('collision check - game done');
         return 'done';
       }
+      collisionFound = true;
       // retreive total rows cleared (if any)
       const rowsCleared = collisionResult[1] ? collisionResult[1].length : 0;
       // assign points if winner found
@@ -224,11 +226,10 @@ class Demo extends React.Component {
         await this.props.actions.collide(collisionData);
         this.newShape();
       }
-    } else {
-      await this.props.actions.locateShape(testShape);
     }
-    return null;
+    return collisionFound;
   }
+
   handlePause = async () => {
     this.canvasMajor.current.focus();
     await this.props.actions.pause(!this.props.game.paused);
@@ -255,11 +256,11 @@ class Demo extends React.Component {
     if (left) {
       if (this.getSideBlock('L')) return;
       copyOfActiveShape.xPosition -= this.props.game.activeShape.unitBlockSize;
-      this.updateScreen(copyOfActiveShape);
+      this.drawScreen(copyOfActiveShape);
     } else if (right) {
       if (this.getSideBlock('R')) return;
       copyOfActiveShape.xPosition += this.props.game.activeShape.unitBlockSize;
-      this.updateScreen(copyOfActiveShape);
+      this.drawScreen(copyOfActiveShape);
     } else if (down) this.tick();
     else this.rotation(this.props.game.activeShape);
   }
@@ -297,7 +298,7 @@ class Demo extends React.Component {
       this.props.game.canvas.canvasMajor.height,
       rotatedShape, false,
     );
-    if (!runCollision(this.props.game, locatedShape)) this.updateScreen(rotatedShape);
+    if (!runCollision(this.props.game, locatedShape)) this.drawScreen(rotatedShape);
   }
 
 

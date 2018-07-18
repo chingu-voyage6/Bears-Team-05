@@ -44,10 +44,7 @@ const drawRuble = (ctx, activeShape, state) => {
 export const drawShape = (ctx, shapeToDraw, state) => {
   const canvasContext = ctx;
   const updatedShape = shapeToDraw;
-  const drawResults = tetrisShapes.getDims(updatedShape);
-  const [bbx, absVertices] = drawResults;
-  updatedShape.boundingBox = bbx;
-  updatedShape.absoluteVertices = absVertices;
+  [updatedShape.boundingBox, updatedShape.absoluteVertices] = tetrisShapes.getDims(updatedShape);
   canvasContext.beginPath();
   canvasContext.fillStyle = tetrisShapes[updatedShape.name].color;
   canvasContext.moveTo(updatedShape.xPosition, updatedShape.yPosition);

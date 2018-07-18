@@ -28,11 +28,12 @@ const fillBlankRows = (occupied, state) => {
   const yCoord = xyCoord.map(y => Number(y.split('-')[1]));
   // find max height of all the occupied cells (since canvas positive y is down use min)
   const heightOccupied = Math.min(...yCoord);
-  const screenHeight = (state.canvas.canvasMajor.height / state.activeShape.unitBlockSize) - 1;
   const screenWidth = (state.canvas.canvasMajor.width / state.activeShape.unitBlockSize) - 1;
+  let boundaryHeight = state.rubble.boundaryCells.map(c => Number(c.split('-')[1]));
+  boundaryHeight = Math.min(...boundaryHeight) - 1;
   let blankFound;
   // scan thru all the potential cells within occupied
-  for (let y = heightOccupied; y <= screenHeight; y += 1) {
+  for (let y = heightOccupied; y <= boundaryHeight; y += 1) {
     if (blankFound) break;
     for (let x = 0; x <= screenWidth; x += 1) {
       const testCoord = `${x}-${y}`;
@@ -50,7 +51,7 @@ const fillBlankRows = (occupied, state) => {
       const oldY = Number(c[0].split('-')[1]);
       if (oldY === (blankFound - 1)) {
         const oldX = Number(c[0].split('-')[0]);
-        newOccupied.push([(`${oldX}-${oldY + 1}`), c[1]]);
+        newOccupied.push([`${oldX}-${oldY + 1}`, c[1]]);
       } else {
         newOccupied.push(c);
       }

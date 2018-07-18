@@ -4,14 +4,16 @@ import {
 } from '../constants/index';
 
 
-const initializeBoundry = (unitBlockSize, width, height) => {
-  const initialBoundry = [];
+const setBoundry = (unitBlockSize, width, height, boundryRowHeight) => {
+  const boundry = [];
   const blocksPerRow = width / unitBlockSize;
   const blocksPerColumn = height / unitBlockSize;
-  for (let i = 0; i < blocksPerRow; i += 1) {
-    initialBoundry.push(`${i}-${blocksPerColumn}`);
+  for (let j = 0; j < boundryRowHeight; j += 1) {
+    for (let i = 0; i < blocksPerRow; i += 1) {
+      boundry.push(`${i}-${blocksPerColumn - j}`);
+    }
   }
-  return initialBoundry;
+  return boundry;
 };
 const initialState = { // determine what needs to go into state, a very small portion here
   timerInterval: 700,
@@ -51,10 +53,11 @@ const initialState = { // determine what needs to go into state, a very small po
 
 
 export const gameReset = () => {
-  initialState.rubble.boundaryCells = initializeBoundry(
+  initialState.rubble.boundaryCells = setBoundry(
     initialState.activeShape.unitBlockSize,
     initialState.canvas.canvasMajor.width,
     initialState.canvas.canvasMajor.height,
+    1,
   );
   return (
     {
