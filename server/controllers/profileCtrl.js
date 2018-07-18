@@ -9,6 +9,7 @@ const getUserProfile = (req, res) => {
 
   res.json({
     authenticated: true,
+    _id: req.user._id,
     userip: ip,
     username: req.user[authService].username,
     displayName: req.user[authService].displayName,
