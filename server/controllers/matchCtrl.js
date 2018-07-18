@@ -40,7 +40,7 @@ const getPlayersBestScores = (req, res, next) => {
 
 /**
  * Get single player's own recent match results
- * Example: GET >> /api/my_results?limit=20
+ * Example: GET >> /api/my_stats?limit=20
  * Secured: yes
  * Expects:
  *    1) req.user._id      {String}   Player's user _id
@@ -48,7 +48,7 @@ const getPlayersBestScores = (req, res, next) => {
  * Returns: JSON object with arrays for most-recent single &
  *    multi-player matches
 */
-const getPlayersRecentMatches = (req, res, next) => {
+const getUsersOwnStats = (req, res, next) => {
   if (!req.user || !req.user._id) {
     return res.status(400).json({ message: 'Missing required parameters.' });
   }
@@ -69,5 +69,5 @@ const getPlayersRecentMatches = (req, res, next) => {
 module.exports = {
   getLeaderboard,
   getPlayersBestScores,
-  getPlayersRecentMatches,
+  getUsersOwnStats,
 };
