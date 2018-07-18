@@ -11,6 +11,7 @@ import Leaderboard from '../Components/Leaderboard/Leaderboard';
 import Login from '../Components/Login/Login';
 import Register from '../Components/Register/Register';
 import Privacy from '../Components/Privacy/Privacy';
+import Profile from '../Components/Profile/Profile';
 
 const AppRouter = () => (
   <BrowserRouter>
@@ -21,8 +22,9 @@ const AppRouter = () => (
         <Route path="/demo" component={Demo} />
         <Route path="/leaderboard" component={Leaderboard} />
         <Route path="/login" component={Login} />
-        <Route path="/register" component={Register} />
         <Route path="/privacy" component={Privacy} />
+        <Route path="/profile" component={Profile} />
+        <Route path="/register" component={Register} />
         <Route component={FourOhFour} />
       </Switch>
       <Footer />
