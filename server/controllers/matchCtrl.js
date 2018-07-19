@@ -39,27 +39,25 @@ const getPlayersBestScores = (req, res, next) => {
 };
 
 /**
- * Get single player's own recent match results
- * Example: GET >> /api/my_stats?limit=20
+ * Get single player's own match statistics
+ * Example: GET >> /api/my_stats
  * Secured: yes
  * Expects:
  *    1) req.user._id      {String}   Player's user _id
- *    2) req.query.limit   {Number}   Qty of matches to return. Default: 10
- * Returns: JSON object with arrays for most-recent single &
- *    multi-player matches
+ * Returns: JSON object of single player high/low scores, games played, and
+ *    multiplayer games played, wins/losses
 */
 const getUsersOwnStats = (req, res, next) => {
   if (!req.user || !req.user._id) {
     return res.status(400).json({ message: 'Missing required parameters.' });
   }
   const playerId = req.user._id;
-  const limit = parseInt(req.query.limit, 10) || 2;
 
-  return Match.getOwnRecentMatches(playerId, limit)
-    .then(([mpMatches, spMatches]) => res.json({
-      spMatches: spMatches.matches,
-      mpMatches: mpMatches.matches,
-    }))
+  return Promise.all([
+    Match.getOwnSPStats(playerId),
+    Match.getOwnMPStats(playerId),
+  ])
+    .then(([spStats, mpStats]) => res.json({ spStats, mpStats }))
     .catch(err => next(err));
 };
 

@@ -88,11 +88,11 @@ matchSchema.statics.getMultiPlayerLeaders = function getMPLeaders(limit) {
 };
 
 matchSchema.statics.getOwnRecentMatches = function getOwnRecentMatches(
-  playerId,
+  player,
   limit,
 ) {
   return this.aggregate([
-    { $match: { 'players._id': ObjectId(playerId) } },
+    { $match: { 'players._id': ObjectId(player) } },
     { $sort: { createdAt: -1 } },
     {
       $group: {
@@ -115,6 +115,67 @@ matchSchema.statics.getOwnRecentMatches = function getOwnRecentMatches(
       },
     },
   ]);
+};
+
+matchSchema.statics.getOwnSPStats = function getOwnSPStats(player) {
+  return this.aggregate([
+    { $match: { 'players._id': ObjectId(player), multiPlayer: false } },
+    { $unwind: '$players' },
+    { $sort: { createdAt: -1 } },
+    {
+      $group: {
+        _id: null,
+        games_played: { $sum: 1 },
+        best_score: { $max: '$players.score' },
+        worst_score: { $min: '$players.score' },
+        matches: { $push: { score: '$players.score', date: '$createdAt' } },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        category: 'single-player',
+        last_ten_games: { $slice: ['$matches', 10] },
+        games_played: 1,
+        best_score: 1,
+        worst_score: 1,
+      },
+    },
+  ])
+    .then(results => results[0]);
+};
+
+matchSchema.statics.getOwnMPStats = function getOwnMPStats(player) {
+  const getGamesWon = this.count({
+    multiPlayer: true,
+    players: { $elemMatch: { _id: player, winner: true } },
+  });
+
+  const getRestStats = this.aggregate([
+    { $match: { 'players._id': ObjectId(player), multiPlayer: true } },
+    { $sort: { createdAt: -1 } },
+    {
+      $group: {
+        _id: null,
+        games_played: { $sum: 1 },
+        matches: { $push: { players: '$players', date: '$createdAt' } },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        last_ten_games: { $slice: ['$matches', 10] },
+        games_played: 1,
+      },
+    },
+  ]);
+
+  return Promise.all([getGamesWon, getRestStats])
+    .then(([gamesWon, restStats]) => ({
+      ...restStats[0],
+      games_won: gamesWon,
+      games_lost: restStats[0].games_played - gamesWon,
+    }));
 };
 
 
