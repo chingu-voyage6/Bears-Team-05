@@ -8,6 +8,7 @@
 }
 
 .profile__content {
+  position: relative;
   box-sizing: border-box;
   padding: 1em;
   background-color: #f2f2f2;
@@ -43,6 +44,22 @@
 
 .profile__heading {
   color: #4f4f4f;
+  display: inline-block;
+}
+
+.profile__heading--right {
+  display: inline-block;
+  position: absolute;
+  right: .5em;
+}
+
+.profile__heading--right > a {
+  color: #4f4f4f;
+  text-decoration: none;
+}
+
+.profile__heading--right > a:hover {
+  text-decoration: underline;
 }
 
 .profile__card--list {

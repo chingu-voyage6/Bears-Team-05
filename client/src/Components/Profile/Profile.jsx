@@ -22,6 +22,9 @@ class Profile extends React.Component {
             <h1 className="profile__heading">
               { displayName }
             </h1>
+            <h1 className="profile__heading--right">
+              <a href="/auth/logout">Logout</a>
+            </h1>
             <div className="profile__card__container">
               <div className="profile__card">
                 <h3 className="profile__heading">Single-Player Stats</h3>
