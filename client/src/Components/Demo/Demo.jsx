@@ -6,13 +6,13 @@ import './Demo.css';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { gameReset, nextShape, updateScreen,
-  locateShape, collide, speedUp, pause } from '../../Actions/tetris';
+  raiseFloor, collide, speedUp, pause } from '../../Actions/tetris';
 
 // custom functions
 import tetrisShapes from './scripts/shapes';
 import shapeLocator from './scripts/locateShape';
 import runCollision from './scripts/collision';
-import { clearCanvas, drawShape, winRubble, drawNextShape } from './scripts/canvas';
+import { clearCanvas, drawShape, winRubble, drawNextShape, drawBoundary } from './scripts/canvas';
 
 // reads from store
 const mapStateToProps = state => state;
@@ -23,7 +23,7 @@ const mapDispatchToProps = dispatch => ({
     gameReset,
     nextShape,
     updateScreen,
-    locateShape,
+    raiseFloor,
     collide,
     speedUp,
     pause,
@@ -53,6 +53,10 @@ class Demo extends React.Component {
           clearTimeout(l);
         }, 250);
       }
+      if (this.props.game.rubble.boundaryCells.length !==
+        prevProps.game.rubble.boundaryCells.length) {
+        this.drawFloor();
+      }
     }
   }
 
@@ -80,6 +84,17 @@ class Demo extends React.Component {
     await this.props.actions.speedUp();
     this.startTick();
   }
+
+  drawFloor = async () => {
+    await this.props.actions.pause(true);
+    const yBoundary = this.props.game.rubble.boundaryCells.map(c => Number(c.split('-')[1]));
+    const yUnique = Array.from(new Set(yBoundary));
+    if (yUnique.length > 1) {
+      drawBoundary(this.canvasContextMajor, this.props.game);
+    }
+    await this.props.actions.pause(false);
+  }
+
   resetBoard =async () => { // clear and restart
     await this.props.actions.gameReset();
     const canvasMajor = this.canvasMajor.current;
@@ -98,9 +113,9 @@ class Demo extends React.Component {
     const randomShape = this.props.game.nextShape ?
       this.initializeShape(this.props.game.nextShape) :
       this.initializeShape(this.getRandShapeName());
-    const newShape = this.getRandShapeName();
-    const nextShapeInfo = this.initializeShape(newShape);
-    await this.props.actions.nextShape(newShape);
+    const newShapeName = this.getRandShapeName();
+    const nextShapeInfo = this.initializeShape(newShapeName);
+    await this.props.actions.nextShape(newShapeName);
     drawNextShape(this.canvasContextMinor, nextShapeInfo, this.props.game);
 
     this.drawScreen(randomShape);
@@ -160,42 +175,45 @@ class Demo extends React.Component {
 
   drawScreen = async (updatedShape) => {
     clearCanvas(this.canvasContextMajor, this.props.game); // clear canvasMajor
-    const drawReturn = drawShape(this.canvasContextMajor, updatedShape, this.props.game);
+    const shapeToDraw = updatedShape;
+    [shapeToDraw.boundingBox, shapeToDraw.absoluteVertices] = tetrisShapes.getDims(updatedShape);
+    drawShape(this.canvasContextMajor, shapeToDraw, this.props.game);
     const copyOfRubble = Object.assign({}, this.props.game.rubble);
     copyOfRubble.winRows = null; // need to reset back to null incase of previous win
-    const data = {
-      activeShape: drawReturn,
-      rubble: copyOfRubble,
-      paused: false,
-    };
 
     // Locate Shape on screen and then set .cell prop of activeShape
     const locatedShape = shapeLocator(
       this.canvasContextMajor,
       this.props.game.canvas.canvasMajor.width,
       this.props.game.canvas.canvasMajor.height,
-      drawReturn, false,
+      shapeToDraw, false,
     );
 
-    // run collision
-    data.activeShape = locatedShape;
+    const data = {
+      activeShape: locatedShape,
+      rubble: copyOfRubble,
+      paused: false,
+    };
     // test for collision and update shape
     const collisionVal = await this.collisionCheck(locatedShape);
+
     if (!collisionVal) await this.props.actions.updateScreen(data);
+    else {
+      console.log(collisionVal);
+      if ((collisionVal[2])) this.drawFloor();
+    }
   }
 
   collisionCheck = async (testShape) => {
     const copyOfPoints = Object.assign({}, this.props.game.points);
     const copyOfRubble = Object.assign({}, this.props.game.rubble);
     const collisionResult = runCollision(this.props.game, testShape);
-    let collisionFound = false;
     if (collisionResult) { // found collision
       // check if game space is all occupied
       if (collisionResult === 'done') {
         this.endTick('collision check - game done');
         return 'done';
       }
-      collisionFound = true;
       // retreive total rows cleared (if any)
       const rowsCleared = collisionResult[1] ? collisionResult[1].length : 0;
       // assign points if winner found
@@ -210,7 +228,7 @@ class Demo extends React.Component {
       };
       if (rowsCleared) { // winner found
         // end tick to play animation and start tick back after animation is over
-        this.endTick('collision check - winning row');
+        this.endTick('collision check - Win');
         clearCanvas(this.canvasContextMajor, this.props.game); // clear canvasMajor
         winRubble(
           this.canvasContextMajor,
@@ -223,11 +241,12 @@ class Demo extends React.Component {
           clearInterval(inter);
         }, 250);
       } else { // no winner found just set state with current rubble
+        this.endTick('collision check - No Win');
         await this.props.actions.collide(collisionData);
-        this.newShape();
+        this.startTick();
       }
     }
-    return collisionFound;
+    return collisionResult;
   }
 
   handlePause = async () => {
@@ -301,6 +320,10 @@ class Demo extends React.Component {
     if (!runCollision(this.props.game, locatedShape)) this.drawScreen(rotatedShape);
   }
 
+  manualFloorRaise = async () => {
+    this.canvasMajor.current.focus();
+    await this.props.actions.raiseFloor(this.props.game.rubble);
+  }
 
   render() {
     if (Object.keys(this.props.game).length) {
@@ -327,6 +350,9 @@ class Demo extends React.Component {
                 onChange={this.handlePause}
               />
             </label>
+            <button className="reset" onClick={() => this.manualFloorRaise()}>
+              Raise Floor
+            </button>
           </div>
           <canvas
             ref={this.canvasMajor}
@@ -354,7 +380,7 @@ Demo.propTypes = {
     gameReset: PropTypes.func,
     nextShape: PropTypes.func,
     updateScreen: PropTypes.func,
-    locateShape: PropTypes.func,
+    raiseFloor: PropTypes.func,
     collide: PropTypes.func,
     speedUp: PropTypes.func,
     pause: PropTypes.func,

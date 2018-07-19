@@ -105,9 +105,9 @@ const runCollision = (state, shapeTested) => {
     // test for winner
     const winners = winCheck(newOccupied, state);
     if (winners.length) {
-      return [clearRows(newOccupied, winners, state), winners];
+      return [clearRows(newOccupied, winners, state), winners, isLowerBoundary.length];
     }
-    return [newOccupied, null];
+    return [newOccupied, null, isLowerBoundary.length];
   }
   return false; // no collision detected
 };

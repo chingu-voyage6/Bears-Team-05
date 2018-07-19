@@ -1,6 +1,6 @@
 import {
   INITIALIZE_GAME, LEVEL_UP, PAUSE,
-  GET_NEXT_SHAPE, SCREEN_UPDATE, LOCATE_SHAPE, COLLISION,
+  GET_NEXT_SHAPE, SCREEN_UPDATE, RAISE_FLOOR, COLLISION,
 } from '../constants/index';
 
 
@@ -95,12 +95,32 @@ export const updateScreen = data => (
   }
 );
 
-export const locateShape = locatedShape => (
-  {
-    type: LOCATE_SHAPE,
-    payload: locatedShape,
-  }
-);
+export const raiseFloor = (oldRubble) => {
+  const newOccupied = oldRubble.occupiedCells.map((c) => {
+    const oldY = Number(c[0].split('-')[1]);
+    const oldX = Number(c[0].split('-')[0]);
+    return ([`${oldX}-${oldY - 1}`, c[1]]);
+  });
+
+  const yBoundary = oldRubble.boundaryCells.map(c => Number(c.split('-')[1]));
+  const oldHeight = Array.from(new Set(yBoundary)).length;
+  const newBoundary = setBoundry(
+    initialState.activeShape.unitBlockSize,
+    initialState.canvas.canvasMajor.width,
+    initialState.canvas.canvasMajor.height,
+    oldHeight + 1,
+  );
+  return (
+    {
+      type: RAISE_FLOOR,
+      payload: {
+        occupiedCells: newOccupied,
+        boundaryCells: newBoundary,
+        winRows: null,
+      },
+    }
+  );
+};
 
 export const collide = data => (
   {
