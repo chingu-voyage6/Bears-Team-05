@@ -13,6 +13,42 @@
   border: 1px solid #4f4f4f;
 }
 
+.profile__card__container {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+}
+
+.profile__card {
+  flex: 1;
+  padding: .5em;
+  border: 1px solid #4f4f4f;
+  background-color: #fff;
+}
+
+.profile__card:first-child {
+  margin-right: .5em;
+}
+
+.profile__card:last-child {
+  margin-left: .5em;
+}
+
+.profile__card--date {
+  color: #4f4f4f;
+  padding: 0 .5em;
+  font-style: italic;
+}
+
 .profile__heading {
   color: #4f4f4f;
+}
+
+.profile__card--list {
+  list-style: none;
+}
+
+.profile__card--list > li > p {
+  font-size: .85em;
+  margin: 0.25em;
 }
