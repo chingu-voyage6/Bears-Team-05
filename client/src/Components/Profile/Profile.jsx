@@ -18,6 +18,15 @@ class Profile extends React.Component {
     this.props.actions.getUsersOwnStats();
   }
 
+  renderStats() {
+    return Object.keys(this.props.user.stats).map(key => (
+      <div key={key}>
+        <h4>{key}</h4>
+        <p>{this.props.user.stats[key]}</p>
+      </div>
+    ));
+  }
+
   render() {
     return (
       <div className="profile">
@@ -25,7 +34,7 @@ class Profile extends React.Component {
           <div className="profile__content">
             <h1 className="profile__heading">Profile</h1>
             <h3>{ this.props.user.displayName }</h3>
-            <h4>Some stats:</h4>
+            <h4>Some stats!</h4>
             <pre>{ JSON.stringify(this.props.user.stats, null, 2) }</pre>
           </div>
           :
