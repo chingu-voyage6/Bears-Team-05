@@ -28,14 +28,80 @@ class Profile extends React.Component {
   }
 
   render() {
+    const { authenticated, displayName, stats } = this.props.user;
     return (
       <div className="profile">
-        { this.props.user.authenticated ?
+        { authenticated ?
           <div className="profile__content">
-            <h1 className="profile__heading">Profile</h1>
-            <h3>{ this.props.user.displayName }</h3>
-            <h4>Some stats!</h4>
-            <pre>{ JSON.stringify(this.props.user.stats, null, 2) }</pre>
+            <h1 className="profile__heading">
+              { displayName }
+            </h1>
+            <div className="profile__card__container">
+              <div className="profile__card">
+                <h3 className="profile__heading">Single-Player Stats</h3>
+                <p>
+                  Games Played: { stats.spStats.games_played }
+                </p>
+                <p>
+                  Best Score: { stats.spStats.best_score }
+                </p>
+                <p>
+                  Worst Score: { stats.spStats.worst_score }
+                </p>
+                <p>
+                  Last 10 Results:
+                </p>
+                <ul className="profile__card--list">
+                  {
+                    stats.spStats.last_ten_games.map(game => (
+                      <li key={game.date}>
+                        <p>
+                          Score: { game.score }
+                          <span className="profile__card--date">
+                            ({ new Date(game.date).toLocaleDateString() })
+                          </span>
+                        </p>
+                      </li>
+                    ))
+                  }
+                </ul>
+              </div>
+              <div className="profile__card">
+                <h3 className="profile__heading">Multi-Player Stats</h3>
+                <p>
+                  Games Played: { stats.mpStats.games_played }
+                </p>
+                <p>
+                  Games Won: { stats.mpStats.games_won }
+                </p>
+                <p>
+                  Games Lost: { stats.mpStats.games_lost }
+                </p>
+                <p>
+                  Last 10 Results:
+                </p>
+                <ul className="profile__card--list">
+                  {
+                    stats.mpStats.last_ten_games.map((game) => {
+                      const winner = game.players.filter(p => p.winner)[0];
+                      const loser = game.players.filter(p => !p.winner)[0];
+                      const text = (winner._id === this.props.user._id)
+                        ? `You beat ${loser.name}`
+                        : `You lost to ${winner.name}`;
+                      return (
+                        <li key={game.date}>
+                          <p>
+                            { text }
+                            <span className="profile__card--date">
+                              ({ new Date(game.date).toLocaleDateString() })
+                            </span>
+                          </p>
+                        </li>);
+                    })
+                  }
+                </ul>
+              </div>
+            </div>
           </div>
           :
           <div className="profile__content">
