@@ -1,13 +1,14 @@
 .profile {
   box-sizing: border-box;
   flex: 1;
-  padding: 1em 60px;
-  max-width: 1000px;
   margin: auto;
+  padding: 1em 60px;
   width: 100%;
+  max-width: 1120px;
 }
 
 .profile__content {
+  box-sizing: border-box;
   padding: 1em;
   background-color: #f2f2f2;
   border: 1px solid #4f4f4f;
@@ -15,7 +16,7 @@
 
 .profile__card__container {
   display: flex;
-  flex-flow: row nowrap;
+  flex-flow: row wrap;
   justify-content: space-between;
 }
 
