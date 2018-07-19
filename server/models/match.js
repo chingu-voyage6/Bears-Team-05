@@ -134,7 +134,6 @@ matchSchema.statics.getOwnSPStats = function getOwnSPStats(player) {
     {
       $project: {
         _id: 0,
-        category: 'single-player',
         last_ten_games: { $slice: ['$matches', 10] },
         games_played: 1,
         best_score: 1,
