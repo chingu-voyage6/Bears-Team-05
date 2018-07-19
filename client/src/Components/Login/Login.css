@@ -1,8 +1,30 @@
 .login {
-  background: white;
+  box-sizing: border-box;
   flex: 1;
+  margin: auto;
+  padding: 1em 60px;
+  width: 100%;
+  max-width: 1120px;
+}
+
+.login__content {
+  box-sizing: border-box;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  justify-content: space-evenly;
+  padding: 1em;
+  background-color: #f2f2f2;
+  border: 1px solid #4f4f4f;
+}
+
+.login__card__container {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-between;
+}
+
+.login__card {
+  flex: 1;
+  padding: .5em;
+  border: 1px solid #4f4f4f;
+  background-color: #fff;
 }
