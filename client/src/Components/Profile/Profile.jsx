@@ -83,8 +83,8 @@ class Profile extends React.Component {
                 <ul className="profile__card--list">
                   {
                     stats.mpStats.last_ten_games.map((game) => {
-                      const winner = game.players.filter(p => p.winner)[0];
-                      const loser = game.players.filter(p => !p.winner)[0];
+                      const winner = game.players.find(p => p.winner);
+                      const loser = game.players.find(p => !p.winner);
                       const text = (winner._id === this.props.user._id)
                         ? `You beat ${loser.name}`
                         : `You lost to ${winner.name}`;
