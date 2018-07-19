@@ -9,22 +9,8 @@ import './Profile.css';
 
 class Profile extends React.Component {
 
-  constructor(props) {
-    super(props);
-    this.state = {};
-  }
-
   componentDidMount() {
     this.props.actions.getUsersOwnStats();
-  }
-
-  renderStats() {
-    return Object.keys(this.props.user.stats).map(key => (
-      <div key={key}>
-        <h4>{key}</h4>
-        <p>{this.props.user.stats[key]}</p>
-      </div>
-    ));
   }
 
   render() {
@@ -39,18 +25,10 @@ class Profile extends React.Component {
             <div className="profile__card__container">
               <div className="profile__card">
                 <h3 className="profile__heading">Single-Player Stats</h3>
-                <p>
-                  Games Played: { stats.spStats.games_played }
-                </p>
-                <p>
-                  Best Score: { stats.spStats.best_score }
-                </p>
-                <p>
-                  Worst Score: { stats.spStats.worst_score }
-                </p>
-                <p>
-                  Last 10 Results:
-                </p>
+                <p> Games Played: { stats.spStats.games_played } </p>
+                <p> Best Score: { stats.spStats.best_score } </p>
+                <p> Worst Score: { stats.spStats.worst_score } </p>
+                <p> Last 10 Results: </p>
                 <ul className="profile__card--list">
                   {
                     stats.spStats.last_ten_games.map(game => (
@@ -68,18 +46,10 @@ class Profile extends React.Component {
               </div>
               <div className="profile__card">
                 <h3 className="profile__heading">Multi-Player Stats</h3>
-                <p>
-                  Games Played: { stats.mpStats.games_played }
-                </p>
-                <p>
-                  Games Won: { stats.mpStats.games_won }
-                </p>
-                <p>
-                  Games Lost: { stats.mpStats.games_lost }
-                </p>
-                <p>
-                  Last 10 Results:
-                </p>
+                <p> Games Played: { stats.mpStats.games_played } </p>
+                <p> Games Won: { stats.mpStats.games_won } </p>
+                <p> Games Lost: { stats.mpStats.games_lost } </p>
+                <p> Last 10 Results: </p>
                 <ul className="profile__card--list">
                   {
                     stats.mpStats.last_ten_games.map((game) => {
