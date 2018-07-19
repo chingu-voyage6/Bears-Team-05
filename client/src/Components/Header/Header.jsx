@@ -27,7 +27,8 @@ class Header extends React.Component {
     super(props);
     this.state = {
       ready: false,
-      loginStatus: 'Login',
+      profileRoute: 'Login',
+      profileRoutePath: '/login',
     };
   }
   componentDidMount() {
@@ -44,16 +45,19 @@ class Header extends React.Component {
     if (this.props.user.authenticated) {
       this.setState({
         ready: true,
-        loginStatus: 'Profile',
+        profileRoute: 'Profile',
+        profileRoutePath: '/profile',
       });
     } else {
       this.setState({
         ready: true,
-        loginStatus: 'Login',
+        profileRoute: 'Login',
+        profileRoutePath: '/login',
       });
     }
   }
   render() {
+    const { profileRoutePath, profileRoute } = this.state;
     return this.state.ready && (
       <header>
         <div className="header">
@@ -67,8 +71,8 @@ class Header extends React.Component {
             <NavLink activeClassName="is-active" to="/leaderboard">
               Leaderboard
             </NavLink>
-            <NavLink activeClassName="is-active" to="/login">
-              {this.state.loginStatus}
+            <NavLink activeClassName="is-active" to={profileRoutePath} >
+              {profileRoute}
             </NavLink>
             <NavLink activeClassName="is-active" to="/register">
               Register
@@ -78,10 +82,8 @@ class Header extends React.Component {
       </header>
     );
   }
-  // return null;
 
 }
-
 
 Header.defaultProps = {
   user: null,
