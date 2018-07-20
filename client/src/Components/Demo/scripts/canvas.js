@@ -2,6 +2,18 @@ import tetrisShapes from './shapes';
 import shapeLocator from './locateShape';
 import floorPattern from '../../../assets/pattern.bmp';
 
+export const drawCells = (ctx, shape) => {
+  const canvasContext = ctx;
+  const b = shape.unitBlockSize;
+  shape.cells.forEach((c) => {
+    canvasContext.beginPath();
+    canvasContext.lineWidth = '3';
+    canvasContext.strokeStyle = 'grey';
+    canvasContext.rect(c[0] * b, c[1] * b, b, b);
+    canvasContext.stroke();
+  });
+};
+
 export const drawGrid = (x, y, occupied, b, ctx) => {
   const canvasContext = ctx;
   const col = occupied ? 'grey' : 'white';
@@ -101,8 +113,17 @@ export const drawNextShape = (ctx, newShape, state) => {
 
   [initiailizedShape.boundingBox, initiailizedShape.absoluteVertices] =
    tetrisShapes.getDims(initiailizedShape);
-  drawShape(ctx, initiailizedShape);
-  shapeLocator(ctx, canvasWidth, canvasHeight, initiailizedShape, false, specialshapes);
+
+  const locatedShape = shapeLocator(
+    ctx,
+    canvasWidth,
+    canvasHeight,
+    initiailizedShape,
+    false,
+    specialshapes,
+  );
+  drawShape(ctx, locatedShape);
+  drawCells(ctx, locatedShape);
 };
 
 

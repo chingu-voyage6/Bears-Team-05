@@ -12,7 +12,7 @@ import { gameReset, nextShape, updateScreen,
 import tetrisShapes from './scripts/shapes';
 import shapeLocator from './scripts/locateShape';
 import { runCollision } from './scripts/collision';
-import { clearCanvas, drawShape, drawRuble, winRubble, drawNextShape, drawBoundary } from './scripts/canvas';
+import { clearCanvas, drawShape, drawRuble, winRubble, drawNextShape, drawBoundary, drawCells } from './scripts/canvas';
 import playerMoves from './scripts/player';
 // react Components
 import Controls from './controls';
@@ -81,10 +81,10 @@ class Demo extends React.Component {
     this.startTick();
   }
 
-  startTick = (floorRedraw = false) => {
+  startTick = () => {
     this.abortCounter = 0;
     if (this.downInterval)clearInterval(this.downInterval);
-    this.newShape(floorRedraw);
+    this.newShape();
     this.downInterval = setInterval(() => {
       this.tick();
     }, this.props.game.timerInterval);
@@ -111,7 +111,7 @@ class Demo extends React.Component {
     this.startTick();
   }
 
-  newShape = async (floorRedraw = false) => {
+  newShape = async () => {
     const randomShape = this.props.game.nextShape ?
       this.initializeShape(this.props.game.nextShape) :
       this.initializeShape(tetrisShapes.getRandShapeName());
@@ -120,7 +120,7 @@ class Demo extends React.Component {
     await this.props.actions.nextShape(newShapeName);
     drawNextShape(this.canvasContextMinor, nextShapeInfo, this.props.game);
 
-    this.drawScreen(randomShape, floorRedraw);
+    this.drawScreen(randomShape);
   }
 
   initializeShape = (shapeName) => {
@@ -163,17 +163,11 @@ class Demo extends React.Component {
     await this.props.actions.pause(false);
   }
 
-  drawScreen = async (updatedShape, floorRedraw) => {
+  drawScreen = async (updatedShape) => {
     clearCanvas(this.canvasContextMajor, this.props.game); // clear canvasMajor
     const shapeToDraw = updatedShape;
     [shapeToDraw.boundingBox, shapeToDraw.absoluteVertices] = tetrisShapes.getDims(updatedShape);
-    drawShape(this.canvasContextMajor, shapeToDraw, this.props.game);
-    if (this.props.game && this.props.game.rubble.occupiedCells.length) {
-      drawRuble(this.canvasContextMajor, this.props.game);
-    }
-    if (floorRedraw) {
-      this.drawFloor();
-    }
+
     const copyOfRubble = Object.assign({}, this.props.game.rubble);
     copyOfRubble.winRows = null; // need to reset back to null incase of previous win
 
@@ -190,10 +184,19 @@ class Demo extends React.Component {
       rubble: copyOfRubble,
       paused: false,
     };
-    // test for collision and update shape
+    // test for collision
     const collisionVal = await this.collisionCheck(locatedShape);
 
-    if (!collisionVal) await this.props.actions.updateScreen(data);
+    // if collision is found, collisionCheck function will take care of the drawing, otherwise...
+    if (!collisionVal) {
+      drawShape(this.canvasContextMajor, locatedShape, this.props.game);
+      drawCells(this.canvasContextMajor, locatedShape);
+      if (this.props.game && this.props.game.rubble.occupiedCells.length) {
+        drawRuble(this.canvasContextMajor, this.props.game);
+      }
+      await this.props.actions.updateScreen(data);
+    }
+
     // need to redraw the floor if there is a collision with the floor
   }
 
@@ -219,8 +222,6 @@ class Demo extends React.Component {
         rubble: copyOfRubble,
         points: copyOfPoints,
       };
-      // checks if collision is with lower boundary and sends parameter to start tick
-      const floorRedraw = (collisionResult[2] > 0);
       if (rowsCleared) { // winner found
         // end tick to play animation and start tick back after animation is over
         this.endTick('collision check - Win');
@@ -232,13 +233,13 @@ class Demo extends React.Component {
         );
         await this.props.actions.collide(collisionData);
         const inter = setTimeout(() => {
-          this.startTick(floorRedraw);
+          this.startTick();
           clearInterval(inter);
         }, 250);
       } else { // no winner found just set state with current rubble
         this.endTick('collision check - No Win');
         await this.props.actions.collide(collisionData);
-        this.startTick(floorRedraw);
+        this.startTick();
       }
     }
     return collisionResult;
