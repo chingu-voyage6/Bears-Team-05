@@ -7,22 +7,19 @@ const { ObjectId } = mongoose.Types;
 
 /* ================================ SCHEMA ================================= */
 
-const matchSchema = new mongoose.Schema(
-  {
-    multiPlayer: { type: Boolean, default: false, required: true },
-    players: [
-      {
-        name: { type: String, required: true },
-        _id: { type: mongoose.Schema.Types.ObjectId, required: true },
-        score: Number,
-        winner: Boolean,
-      },
-    ],
-  },
-  {
-    timestamps: true,
-  },
-);
+const matchSchema = new mongoose.Schema({
+  difficulty: { type: Number, min: 1, max: 4 },
+  multiPlayer: { type: Boolean, default: false, required: true },
+  players: [
+    {
+      name: { type: String, required: true },
+      _id: { type: mongoose.Schema.Types.ObjectId, required: true },
+      score: Number,
+      winner: Boolean,
+    },
+  ],
+  ts: { type: Number, default: Date.now },
+});
 
 
 /* ============================ SCHEMA METHODS ============================= */
@@ -88,12 +85,12 @@ matchSchema.statics.getMultiPlayerLeaders = function getMPLeaders(limit) {
 };
 
 matchSchema.statics.getOwnRecentMatches = function getOwnRecentMatches(
-  playerId,
+  player,
   limit,
 ) {
   return this.aggregate([
-    { $match: { 'players._id': ObjectId(playerId) } },
-    { $sort: { createdAt: -1 } },
+    { $match: { 'players._id': ObjectId(player) } },
+    { $sort: { ts: -1 } },
     {
       $group: {
         _id: { multiPlayer: '$multiPlayer' },
@@ -110,11 +107,76 @@ matchSchema.statics.getOwnRecentMatches = function getOwnRecentMatches(
       $project: {
         'matches._id': 0,
         'matches.multiPlayer': 0,
-        'matches.updatedAt': 0,
         'matches.__v': 0,
       },
     },
   ]);
+};
+
+matchSchema.statics.getOwnSPStats = function getOwnSPStats(player) {
+  return this.aggregate([
+    { $match: { 'players._id': ObjectId(player), multiPlayer: false } },
+    { $unwind: '$players' },
+    { $sort: { ts: -1 } },
+    {
+      $group: {
+        _id: null,
+        games_played: { $sum: 1 },
+        best_score: { $max: '$players.score' },
+        worst_score: { $min: '$players.score' },
+        matches: { $push: { score: '$players.score', date: '$ts' } },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        last_ten_games: { $slice: ['$matches', 10] },
+        games_played: 1,
+        best_score: 1,
+        worst_score: 1,
+      },
+    },
+  ])
+    .then(results => results[0]);
+};
+
+matchSchema.statics.getOwnMPStats = function getOwnMPStats(player) {
+  const getGamesWon = this.count({
+    multiPlayer: true,
+    players: { $elemMatch: { _id: player, winner: true } },
+  });
+
+  const getRestStats = this.aggregate([
+    { $match: { 'players._id': ObjectId(player), multiPlayer: true } },
+    { $sort: { ts: -1 } },
+    {
+      $group: {
+        _id: null,
+        games_played: { $sum: 1 },
+        matches: {
+          $push: {
+            players: '$players',
+            date: '$ts',
+            difficulty: '$difficulty',
+          },
+        },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        last_ten_games: { $slice: ['$matches', 10] },
+        games_played: 1,
+      },
+    },
+  ]);
+
+  return Promise.all([getGamesWon, getRestStats])
+    .then(([gamesWon, restStats]) => ({
+      ...restStats[0],
+      games_won: gamesWon,
+      games_lost: restStats[0].games_played - gamesWon,
+    }));
 };
 
 

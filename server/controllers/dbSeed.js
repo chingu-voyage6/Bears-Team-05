@@ -3,30 +3,27 @@ const Match = require('../models/match');
 
 const seedMatches = (req, res) => {
   const dummies = [
-    { name: 'Quincy', id: new mongoose.Types.ObjectId() },
-    { name: 'Dave', id: new mongoose.Types.ObjectId() },
-    { name: 'Joseph', id: new mongoose.Types.ObjectId() },
-    { name: 'Donald', id: new mongoose.Types.ObjectId() },
-    { name: 'Danica', id: new mongoose.Types.ObjectId() },
-    { name: 'Yancy', id: new mongoose.Types.ObjectId() },
-    { name: 'belcurv', id: new mongoose.Types.ObjectId() },
-    { name: 'terrance', id: new mongoose.Types.ObjectId() },
-    { name: 'rbertram8', id: new mongoose.Types.ObjectId() },
-    { name: 'Dereje', id: new mongoose.Types.ObjectId() },
-    { name: 'Chance', id: new mongoose.Types.ObjectId() },
     { name: 'Adam', id: new mongoose.Types.ObjectId() },
-    { name: 'Kate', id: new mongoose.Types.ObjectId() },
-    { name: 'Kitty', id: new mongoose.Types.ObjectId() },
+    { name: 'belcurv', id: new mongoose.Types.ObjectId(process.env.BELCURV_ID) },
     { name: 'Bernard', id: new mongoose.Types.ObjectId() },
-    { name: 'Kevin', id: new mongoose.Types.ObjectId() },
+    { name: 'Chance', id: new mongoose.Types.ObjectId() },
+    { name: 'Danica', id: new mongoose.Types.ObjectId() },
+    { name: 'Dave', id: new mongoose.Types.ObjectId() },
+    { name: 'Dereje', id: new mongoose.Types.ObjectId(process.env.DEREJE_ID) },
+    { name: 'Donald', id: new mongoose.Types.ObjectId() },
     { name: 'Iggy', id: new mongoose.Types.ObjectId() },
+    { name: 'Joseph', id: new mongoose.Types.ObjectId() },
+    { name: 'Kate', id: new mongoose.Types.ObjectId() },
+    { name: 'Kevin', id: new mongoose.Types.ObjectId() },
+    { name: 'Kitty', id: new mongoose.Types.ObjectId() },
+    { name: 'Quincy', id: new mongoose.Types.ObjectId() },
+    { name: 'rbertram8', id: new mongoose.Types.ObjectId(process.env.RBERTRAM8_ID) },
     { name: 'terrance', id: new mongoose.Types.ObjectId() },
-    { name: 'rbertram8', id: new mongoose.Types.ObjectId() },
-    { name: 'Dereje', id: new mongoose.Types.ObjectId() },
+    { name: 'Yancy', id: new mongoose.Types.ObjectId() },
   ];
 
   const docs = [];
-  for (let i = 0; i < 100; i += 1) {
+  for (let i = 0; i < 500; i += 1) {
     const isMultiplayer = !!Math.round(Math.random());
     if (isMultiplayer) {
       const index1 = Math.floor(Math.random() * dummies.length);
@@ -35,8 +32,10 @@ const seedMatches = (req, res) => {
         index2 = Math.floor(Math.random() * dummies.length);
       } while (index1 === index2);
       const winner = Math.round(Math.random());
+      const difficulty = Math.floor(Math.random() * 4) + 1;
       docs.push({
         multiPlayer: isMultiplayer,
+        difficulty,
         players: [
           {
             name: dummies[index1].name,
@@ -58,7 +57,7 @@ const seedMatches = (req, res) => {
           {
             name: dummies[index].name,
             _id: dummies[index].id,
-            score: Math.round(Math.random() * 1000),
+            score: Math.round(Math.random() * 10000) * 10,
           },
         ],
       });
