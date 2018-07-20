@@ -19,26 +19,26 @@ class Profile extends React.Component {
       <div className="profile">
         { authenticated ?
           <div className="profile__content">
-            <h1 className="profile__heading">
-              { displayName }
-            </h1>
-            <h1 className="profile__heading--right">
-              <a href="/auth/logout">Logout</a>
-            </h1>
-            <div className="profile__card__container">
+            <div className="profile__header">
+              <h1> { displayName } </h1>
+              <a className="profile-logout__button" href="/auth/logout">
+                Logout
+              </a>
+            </div>
+            <div className="profile__card-container">
               <div className="profile__card">
                 <h3 className="profile__heading">Single-Player Stats</h3>
                 <p> Games Played: { stats.spStats.games_played } </p>
                 <p> Best Score: { stats.spStats.best_score } </p>
                 <p> Worst Score: { stats.spStats.worst_score } </p>
                 <p> Last 10 Results: </p>
-                <ul className="profile__card--list">
+                <ul className="profile__card-list">
                   {
                     stats.spStats.last_ten_games.map(game => (
                       <li key={game.date}>
                         <p>
                           Score: { game.score }
-                          <span className="profile__card--date">
+                          <span className="profile__card-date">
                             ({ new Date(game.date).toLocaleDateString() })
                           </span>
                         </p>
@@ -53,7 +53,7 @@ class Profile extends React.Component {
                 <p> Games Won: { stats.mpStats.games_won } </p>
                 <p> Games Lost: { stats.mpStats.games_lost } </p>
                 <p> Last 10 Results: </p>
-                <ul className="profile__card--list">
+                <ul className="profile__card-list">
                   {
                     stats.mpStats.last_ten_games.map((game) => {
                       const winner = game.players.find(p => p.winner);
@@ -65,7 +65,7 @@ class Profile extends React.Component {
                         <li key={game.date}>
                           <p>
                             { text }
-                            <span className="profile__card--date">
+                            <span className="profile__card-date">
                               ({ new Date(game.date).toLocaleDateString() })
                             </span>
                           </p>
