@@ -28,3 +28,27 @@
   border: 1px solid #4f4f4f;
   background-color: #fff;
 }
+
+.login__button--google {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  background-color: #587585;
+  border-radius: 3px;
+  height: 40px;
+  text-decoration: none;
+  color: white;
+  font-size: 1.2em;
+  padding: .25em;
+}
+
+.login__button--google > img {
+  display: block;
+  border-right: 1px solid #bbbbbb;
+  padding-right: .2em;
+}
+
+.login__button--text {
+  line-height: normal;
+  padding: 0 .5em;
+}

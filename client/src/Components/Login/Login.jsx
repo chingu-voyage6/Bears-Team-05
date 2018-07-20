@@ -1,13 +1,14 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import './Login.css';
+import gIcon from '../../assets/Google_G_Logo.svg';
 
 const Login = () => (
   <div className="login">
     <div className="login__content">
-      <a href="/auth/google">Login With Google</a>
-      <br />
-      <Link to="/">Home</Link>
+      <a className="login__button--google" href="/auth/google">
+        <img src={gIcon} alt="G icon" />
+        <p className="login__button--text">Login With Google</p>
+      </a>
     </div>
   </div>
 );
