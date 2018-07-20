@@ -32,8 +32,10 @@ const seedMatches = (req, res) => {
         index2 = Math.floor(Math.random() * dummies.length);
       } while (index1 === index2);
       const winner = Math.round(Math.random());
+      const difficulty = Math.floor(Math.random() * 4) + 1;
       docs.push({
         multiPlayer: isMultiplayer,
+        difficulty,
         players: [
           {
             name: dummies[index1].name,
