@@ -84,7 +84,7 @@ const clearRows = (occupied, winners, state) => {
   return fillBlankRows(occupied, state);
 };
 
-export const runCollision = (state, shapeTested) => {
+export const runCollisionTest = (state, shapeTested) => {
   const occupiedCellLocations = state.rubble.occupiedCells.map(c => c[0]);
   // shape to test for collison
   const testedShape = shapeTested.cells.map(c => c.join('-'));
@@ -97,20 +97,43 @@ export const runCollision = (state, shapeTested) => {
   // upperBoundary ocupied cells
   const isUpperBoundary = shapeTested.cells.filter(c => c[1] === 0);
   if (isOccupied.length || isLowerBoundary.length) { // collision detected
-    if (isUpperBoundary.length) return 'done';
+    if (isUpperBoundary.length) return [];// game over
+    let collisionData;
     // add color info to active shape
     preCollisionShape = preCollisionShape.map(c => [c, tetrisShapes[state.activeShape.name].color]);
     // add active shaped to occupied cells
     const newOccupied = [...state.rubble.occupiedCells, ...preCollisionShape];
     // test for winner
     const winners = winCheck(newOccupied, state);
+    const copyOfRubble = Object.assign({}, state.rubble);
+    const copyOfPoints = Object.assign({}, state.points);
     if (winners.length) {
-      return [clearRows(newOccupied, winners, state), winners, isLowerBoundary.length];
+      // assign points if winner found
+      copyOfPoints.totalLinesCleared = state.points.totalLinesCleared + winners.length;
+      copyOfPoints.level = Math.floor(copyOfPoints.totalLinesCleared /
+       (state.points.levelUp));
+      // assign new rubble coordinates
+      copyOfRubble.occupiedCells = clearRows(newOccupied, winners, state);
+      copyOfRubble.winRows = winners;
+
+      collisionData = {
+        rubble: copyOfRubble,
+        points: copyOfPoints,
+      };
+      // winner return
+      return [collisionData, winners, isLowerBoundary.length];
     }
-    return [newOccupied, null, isLowerBoundary.length];
+    copyOfRubble.occupiedCells = newOccupied;
+    collisionData = {
+      rubble: copyOfRubble,
+      points: copyOfPoints, // unchanged
+    };
+    // plain collision return
+    return [collisionData, null, isLowerBoundary.length];
   }
-  return false; // no collision detected
+  return null; // no collision return
 };
+
 
 export const getSideBlock = (direction, state) => {
   // checks for player x-direction movement obstructions
@@ -124,4 +147,3 @@ export const getSideBlock = (direction, state) => {
   const blocked = cellCheck.filter(c => occupiedCellLocations.includes(c));
   return !!blocked.length;
 };
-

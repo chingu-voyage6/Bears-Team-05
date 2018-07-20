@@ -11,7 +11,7 @@ import { gameReset, nextShape, updateScreen,
 // custom functions
 import tetrisShapes from './scripts/shapes';
 import shapeLocator from './scripts/locateShape';
-import { runCollision } from './scripts/collision';
+import { runCollisionTest } from './scripts/collision';
 import { clearCanvas, drawShape, drawRuble, winRubble, drawNextShape, drawBoundary, drawCells } from './scripts/canvas';
 import playerMoves from './scripts/player';
 // react Components
@@ -179,50 +179,11 @@ class Demo extends React.Component {
       shapeToDraw, false,
     );
 
-    const data = {
-      activeShape: locatedShape,
-      rubble: copyOfRubble,
-      paused: false,
-    };
     // test for collision
-    const collisionVal = await this.collisionCheck(locatedShape);
-
-    // if collision is found, collisionCheck function will take care of the drawing, otherwise...
-    if (!collisionVal) {
-      drawShape(this.canvasContextMajor, locatedShape, this.props.game);
-      drawCells(this.canvasContextMajor, locatedShape);
-      if (this.props.game && this.props.game.rubble.occupiedCells.length) {
-        drawRuble(this.canvasContextMajor, this.props.game);
-      }
-      await this.props.actions.updateScreen(data);
-    }
-
-    // need to redraw the floor if there is a collision with the floor
-  }
-
-  collisionCheck = async (testShape) => {
-    const copyOfPoints = Object.assign({}, this.props.game.points);
-    const copyOfRubble = Object.assign({}, this.props.game.rubble);
-    const collisionResult = runCollision(this.props.game, testShape);
-    if (collisionResult) { // found collision
-      // check if game space is all occupied
-      if (collisionResult === 'done') {
-        this.endTick('collision check - game done');
-        return 'done';
-      }
-      // retreive total rows cleared (if any)
-      const rowsCleared = collisionResult[1] ? collisionResult[1].length : 0;
-      // assign points if winner found
-      copyOfPoints.totalLinesCleared = this.props.game.points.totalLinesCleared + rowsCleared;
-      copyOfPoints.level = Math.floor(copyOfPoints.totalLinesCleared /
-         (this.props.game.points.levelUp));
-      // assign new rubble coordinates
-      [copyOfRubble.occupiedCells, copyOfRubble.winRows] = collisionResult;
-      const collisionData = {
-        rubble: copyOfRubble,
-        points: copyOfPoints,
-      };
-      if (rowsCleared) { // winner found
+    const collisionResult = runCollisionTest(this.props.game, locatedShape);
+    if (collisionResult && !collisionResult.length) this.endTick('collision check - game done');
+    else if (collisionResult && collisionResult.length) {
+      if (collisionResult[1]) { // winner found
         // end tick to play animation and start tick back after animation is over
         this.endTick('collision check - Win');
         clearCanvas(this.canvasContextMajor, this.props.game); // clear canvasMajor
@@ -231,18 +192,30 @@ class Demo extends React.Component {
           this.props.game,
           collisionResult[1],
         );
-        await this.props.actions.collide(collisionData);
+        await this.props.actions.collide(collisionResult[0]);
         const inter = setTimeout(() => {
           this.startTick();
           clearInterval(inter);
         }, 250);
       } else { // no winner found just set state with current rubble
         this.endTick('collision check - No Win');
-        await this.props.actions.collide(collisionData);
+        await this.props.actions.collide(collisionResult[0]);
         this.startTick();
       }
+    } else {
+      /*  no collision is found, do this */
+      const data = {
+        activeShape: locatedShape,
+        rubble: copyOfRubble,
+        paused: false,
+      };
+      drawShape(this.canvasContextMajor, locatedShape, this.props.game);
+      drawCells(this.canvasContextMajor, locatedShape);
+      if (this.props.game && this.props.game.rubble.occupiedCells.length) {
+        drawRuble(this.canvasContextMajor, this.props.game);
+      }
+      await this.props.actions.updateScreen(data);
     }
-    return collisionResult;
   }
 
   /* Handle Player Events Below */

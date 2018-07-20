@@ -1,4 +1,4 @@
-import { runCollision, getSideBlock } from './collision';
+import { runCollisionTest, getSideBlock } from './collision';
 import tetrisShapes from './shapes';
 import shapeLocator from './locateShape';
 
@@ -7,35 +7,34 @@ const rotation = (state, ctx) => {
   const rotatedShape = Object.assign({}, state.activeShape);
   // assign new unit vertices and find bbox and absolutevertices
   rotatedShape.unitVertices = unitVerticesAfterRotation;
-  const [boundingBox, absoluteVertices] = tetrisShapes.getDims(rotatedShape);
+  [rotatedShape.boundingBox, rotatedShape.absoluteVertices] = tetrisShapes.getDims(rotatedShape);
 
   rotatedShape.rotationStage = rotatedShape.rotationStage > 2 ?
     0 :
     rotatedShape.rotationStage + 1;
   rotatedShape.cells = [];
-  rotatedShape.absoluteVertices = absoluteVertices;
-  rotatedShape.boundingBox = boundingBox;
 
   // do crude wall kicks, ideally should translate with a recursive function
   if (
-    boundingBox[0] < 0 ||
-        boundingBox[1] > state.canvas.canvasMajor.width
+    rotatedShape.boundingBox[0] < 0 ||
+        rotatedShape.boundingBox[1] > state.canvas.canvasMajor.width
   ) { // side wall kicks
     const translateUnits = state.activeShape.name === 'shapeI' ? 2 : 1;
-    if (boundingBox[0] < 0) { // translate to the left
+    if (rotatedShape.boundingBox[0] < 0) { // translate to the left
       rotatedShape.xPosition += (translateUnits * state.activeShape.unitBlockSize);
     } else { // translate to the right
       rotatedShape.xPosition -= (translateUnits * state.activeShape.unitBlockSize);
     }
   }
-  // locate shape to check collision on rotation, if collision detected do not rotate shape
+  /* locate shape to get cell values and check for collision on rotation,
+     if collision detected do not rotate shape */
   const locatedShape = shapeLocator(
     ctx,
     state.canvas.canvasMajor.width,
     state.canvas.canvasMajor.height,
     rotatedShape, false,
   );
-  if (!runCollision(state, locatedShape)) return rotatedShape;
+  if (!runCollisionTest(state, locatedShape)) return rotatedShape;
   return null;
 };
 
