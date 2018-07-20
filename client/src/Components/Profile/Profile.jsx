@@ -64,7 +64,7 @@ class Profile extends React.Component {
                       return (
                         <li key={game.date}>
                           <p>
-                            { text }
+                            { text } on level { game.difficulty }
                             <span className="profile__card-date">
                               ({ new Date(game.date).toLocaleDateString() })
                             </span>
