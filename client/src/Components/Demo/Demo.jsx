@@ -247,7 +247,7 @@ class Demo extends React.Component {
             onReset={() => this.resetBoard()}
             game={this.props.game}
             onhandlePause={() => this.handlePause}
-            onfloorRaise={() => this.manualFloorRaise()}
+            onFloorRaise={() => this.manualFloorRaise()}
           />
           <canvas
             ref={this.canvasMajor}

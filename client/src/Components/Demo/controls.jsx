@@ -24,7 +24,7 @@ const Controls = props => (
         onChange={props.onhandlePause()}
       />
     </label>
-    <button className="reset" onClick={() => props.onfloorRaise()}>
+    <button className="reset" onClick={() => props.onFloorRaise()}>
         Raise Floor
     </button>
   </div>
@@ -32,16 +32,16 @@ const Controls = props => (
 );
 Controls.defaultProps = {
   onReset: null,
-  onfloorRaise: null,
+  onFloorRaise: null,
   onhandlePause: null,
   game: {},
   onCanvas: null,
 };
 Controls.propTypes = {
   onReset: PropTypes.func,
-  onfloorRaise: PropTypes.func,
+  onFloorRaise: PropTypes.func,
   onhandlePause: PropTypes.func,
   game: PropTypes.objectOf(PropTypes.any),
-  onCanvas: PropTypes.func,
+  onCanvas: PropTypes.objectOf(PropTypes.any),
 };
 export default Controls;
