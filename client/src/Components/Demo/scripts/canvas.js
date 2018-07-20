@@ -25,9 +25,9 @@ export const drawGridSpecial = (x, y, occupied, b, ctx) => {
   }
 };
 
-const drawRuble = (ctx, activeShape, state) => {
+export const drawRuble = (ctx, state) => {
   const canvasContext = ctx;
-  const b = activeShape.unitBlockSize;
+  const b = state.activeShape.unitBlockSize;
 
   state.rubble.occupiedCells.forEach((cell) => {
     const [cellString, color] = cell;
@@ -61,7 +61,7 @@ export const drawBoundary = (ctx, state) => {
   };
 };
 
-export const drawShape = (ctx, shapeToDraw, state) => {
+export const drawShape = (ctx, shapeToDraw) => {
   const canvasContext = ctx;
   canvasContext.beginPath();
   canvasContext.fillStyle = tetrisShapes[shapeToDraw.name].color;
@@ -71,18 +71,16 @@ export const drawShape = (ctx, shapeToDraw, state) => {
   });
   canvasContext.lineTo(shapeToDraw.xPosition, shapeToDraw.yPosition);
   canvasContext.fill();
-  if (state && state.rubble.occupiedCells.length) {
-    drawRuble(canvasContext, shapeToDraw, state);
-  }
 };
 
 // clear canvas
-export const clearCanvas = (canvasContext, state) => {
+export const clearCanvas = (canvasContext, state, fullClear = false) => {
   const yBoundary = state.rubble.boundaryCells.map(c => Number(c.split('-')[1]));
   const boundaryHeight = (Array.from(new Set(yBoundary)).length - 1) *
    state.activeShape.unitBlockSize;
   const yStart = state.canvas.canvasMajor.height - boundaryHeight;
-  canvasContext.clearRect(0, 0, state.canvas.canvasMajor.width, yStart);
+  const heightToClear = fullClear ? state.canvas.canvasMajor.height : yStart;
+  canvasContext.clearRect(0, 0, state.canvas.canvasMajor.width, heightToClear);
 };
 
 export const drawNextShape = (ctx, newShape, state) => {
@@ -110,6 +108,7 @@ export const drawNextShape = (ctx, newShape, state) => {
 
 export const winRubble = (ctx, state, winners) => {
   const canvasContext = ctx;
+  drawBoundary(canvasContext, state);
   const b = state.activeShape.unitBlockSize;
   state.rubble.occupiedCells.forEach((cell) => {
     const [cellString, color] = cell;

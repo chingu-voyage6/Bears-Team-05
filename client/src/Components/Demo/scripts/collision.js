@@ -84,7 +84,7 @@ const clearRows = (occupied, winners, state) => {
   return fillBlankRows(occupied, state);
 };
 
-const runCollision = (state, shapeTested) => {
+export const runCollision = (state, shapeTested) => {
   const occupiedCellLocations = state.rubble.occupiedCells.map(c => c[0]);
   // shape to test for collison
   const testedShape = shapeTested.cells.map(c => c.join('-'));
@@ -112,5 +112,16 @@ const runCollision = (state, shapeTested) => {
   return false; // no collision detected
 };
 
-export default runCollision;
+export const getSideBlock = (direction, state) => {
+  // checks for player x-direction movement obstructions
+  const cellCheck = state.activeShape.cells.map((c) => {
+    if (direction === 'L') {
+      return [c[0] - 1, c[1]].join('-');
+    }
+    return [c[0] + 1, c[1]].join('-');
+  });
+  const occupiedCellLocations = state.rubble.occupiedCells.map(c => c[0]);
+  const blocked = cellCheck.filter(c => occupiedCellLocations.includes(c));
+  return !!blocked.length;
+};
 
