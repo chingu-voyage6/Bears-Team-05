@@ -74,9 +74,6 @@ class Header extends React.Component {
             <NavLink activeClassName="is-active" to={profileRoutePath} >
               {profileRoute}
             </NavLink>
-            <NavLink activeClassName="is-active" to="/register">
-              Register
-            </NavLink>
           </div>
         </div>
       </header>
