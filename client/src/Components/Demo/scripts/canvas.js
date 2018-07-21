@@ -2,7 +2,7 @@ import tetrisShapes from './shapes';
 import shapeLocator from './locateShape';
 import floorPattern from '../../../assets/pattern.bmp';
 
-export const drawCells = (ctx, shape, oponent = false) => {
+export const drawCells = (ctx, shape, opponent = false) => {
   const canvasContext = ctx;
   const b = shape.unitBlockSize;
   shape.cells.forEach((c) => {
@@ -11,7 +11,7 @@ export const drawCells = (ctx, shape, oponent = false) => {
     canvasContext.strokeStyle = 'grey';
     canvasContext.rect(c[0] * b, c[1] * b, b, b);
     canvasContext.stroke();
-    if (oponent) {
+    if (opponent) {
       canvasContext.fillStyle = tetrisShapes[shape.name].color;
       canvasContext.fill();
     }
@@ -41,7 +41,7 @@ export const drawGridSpecial = (x, y, occupied, b, ctx) => {
   }
 };
 
-export const drawRuble = (ctx, state, oponent = false) => {
+export const drawRuble = (ctx, state, opponent = false) => {
   const canvasContext = ctx;
   const b = state.activeShape.unitBlockSize;
 
@@ -56,7 +56,7 @@ export const drawRuble = (ctx, state, oponent = false) => {
     canvasContext.fillRect(x * b, y * b, b, b);
     // draw borders for rubble
     canvasContext.beginPath();
-    canvasContext.lineWidth = oponent ? '2' : '3';
+    canvasContext.lineWidth = opponent ? '2' : '3';
     canvasContext.strokeStyle = 'grey';
     canvasContext.rect(x * b, y * b, b, b);
     canvasContext.stroke();
@@ -67,13 +67,13 @@ export const drawBoundary = (ctx, state) => {
   const yBoundary = state.rubble.boundaryCells.map(c => Number(c.split('-')[1]));
   const boundaryHeight = (Array.from(new Set(yBoundary)).length - 1) *
    state.activeShape.unitBlockSize;
-  const yStart = state.canvas.canvasMajor.height - boundaryHeight;
+  const yStart = ctx.canvas.height - boundaryHeight;
   const img = new Image();
   img.src = floorPattern;
   img.onload = () => {
     const pattern = ctx.createPattern(img, 'repeat');
     ctx.fillStyle = pattern;
-    ctx.fillRect(0, yStart, state.canvas.canvasMajor.width, boundaryHeight);
+    ctx.fillRect(0, yStart, ctx.canvas.width, boundaryHeight);
   };
 };
 
@@ -94,13 +94,13 @@ export const clearCanvas = (canvasContext, state, fullClear = false) => {
   const yBoundary = state.rubble.boundaryCells.map(c => Number(c.split('-')[1]));
   const boundaryHeight = (Array.from(new Set(yBoundary)).length - 1) *
    state.activeShape.unitBlockSize;
-  const yStart = state.canvas.canvasMajor.height - boundaryHeight;
-  const heightToClear = fullClear ? state.canvas.canvasMajor.height : yStart;
-  canvasContext.clearRect(0, 0, state.canvas.canvasMajor.width, heightToClear);
+  const yStart = canvasContext.canvas.height - boundaryHeight;
+  const heightToClear = fullClear ? canvasContext.canvas.height : yStart;
+  canvasContext.clearRect(0, 0, canvasContext.canvas.width, heightToClear);
 };
 
 export const drawNextShape = (ctx, newShape, state) => {
-  clearCanvas(ctx, state);
+  clearCanvas(ctx, state, true);
   const initiailizedShape = newShape;
   const canvasWidth = state.canvas.canvasMinor.width;
   const canvasHeight = state.canvas.canvasMinor.height;

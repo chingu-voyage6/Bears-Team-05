@@ -17,7 +17,7 @@ import { clearCanvas, drawShape,
 import playerMoves from './scripts/player';
 // react Components
 import Controls from './controls';
-import Oponent from './opponent';
+import Opponent from './opponent';
 
 // reads from store
 const mapStateToProps = state => state;
@@ -41,7 +41,9 @@ class Demo extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {
+      multiPlayer: false,
+    };
     this.canvasMajor = React.createRef();
     this.canvasMinor = React.createRef();
   }
@@ -240,6 +242,16 @@ class Demo extends React.Component {
     }
   }
 
+  handleMultiplayer = () => {
+    if (this.props.user.authenticated) {
+      this.setState({
+        multiPlayer: !this.state.multiPlayer,
+      });
+    } else {
+      window.location = '/login';
+    }
+  }
+
   render() {
     if (Object.keys(this.props.game).length) {
       return (
@@ -250,6 +262,8 @@ class Demo extends React.Component {
             game={this.props.game}
             onhandlePause={() => this.handlePause}
             onFloorRaise={() => this.manualFloorRaise()}
+            multiPlayer={this.state.multiPlayer}
+            onMultiPlayer={() => this.handleMultiplayer}
           />
           <canvas
             ref={this.canvasMajor}
@@ -258,7 +272,11 @@ class Demo extends React.Component {
             tabIndex="0"
             onKeyDown={e => this.gamePlay(e)}
           />
-          <Oponent />
+          {this.state.multiPlayer ?
+            <Opponent />
+            :
+            null
+          }
         </div>
       );
     }
@@ -271,6 +289,7 @@ class Demo extends React.Component {
 Demo.defaultProps = {
   actions: {},
   game: {},
+  user: {},
 };
 
 Demo.propTypes = {
@@ -284,5 +303,6 @@ Demo.propTypes = {
     pause: PropTypes.func,
   }),
   game: PropTypes.objectOf(PropTypes.any),
+  user: PropTypes.objectOf(PropTypes.any),
 };
 export default connect(mapStateToProps, mapDispatchToProps)(Demo);

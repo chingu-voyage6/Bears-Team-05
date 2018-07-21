@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import './oponent.css';
+import './opponent.css';
 
 // connect to redux
 import { connect } from 'react-redux';
@@ -10,15 +10,15 @@ import { clearCanvas, drawRuble, drawBoundary, drawCells } from './scripts/canva
 // reads from store
 const mapStateToProps = state => state;
 
-class Oponent extends React.Component {
+class Opponent extends React.Component {
 
   constructor(props) {
     super(props);
     this.state = { };
-    this.canvasOponent = React.createRef();
+    this.canvasOpponent = React.createRef();
   }
   componentDidMount() {
-    console.log('Oponent Mounted!!');
+    console.log('Opponent Mounted!!');
     this.counter = 0;
     this.simulateTick();
   }
@@ -29,18 +29,17 @@ class Oponent extends React.Component {
 
 
   setGame = () => {
-    const copyofState = JSON.parse(JSON.stringify(this.props.game));
-    if (this.canvasOponent.current) {
-      const canvasOponent = this.canvasOponent.current;
-      canvasOponent.style.backgroundColor = 'black';
-      this.canvasOponentContext = canvasOponent.getContext('2d');
-      copyofState.activeShape.unitBlockSize = this.props.game.activeShape.unitBlockSize / 2;
-      copyofState.canvas.canvasMajor.width = this.props.game.canvas.canvasMajor.width / 2;
-      copyofState.canvas.canvasMajor.height = this.props.game.canvas.canvasMajor.height / 2;
-      clearCanvas(this.canvasOponentContext, copyofState);
-      drawBoundary(this.canvasOponentContext, copyofState);
-      drawCells(this.canvasOponentContext, copyofState.activeShape, true);
-      drawRuble(this.canvasOponentContext, copyofState, true);
+    // full deep copy of game state needed as object mutation becomes a problem
+    const copyOfState = JSON.parse(JSON.stringify(this.props.game));
+    if (this.canvasOpponent.current) {
+      const canvasOpponent = this.canvasOpponent.current;
+      canvasOpponent.style.backgroundColor = 'black';
+      this.canvasOpponentContext = canvasOpponent.getContext('2d');
+      copyOfState.activeShape.unitBlockSize = this.props.game.activeShape.unitBlockSize / 2;
+      clearCanvas(this.canvasOpponentContext, copyOfState);
+      drawBoundary(this.canvasOpponentContext, copyOfState);
+      drawCells(this.canvasOpponentContext, copyOfState.activeShape, true);
+      drawRuble(this.canvasOpponentContext, copyOfState, true);
     }
   };
 
@@ -51,17 +50,17 @@ class Oponent extends React.Component {
   }
 
   render() {
-    if (this.props.user.authenticated && this.props.game.activeShape.cells.length) {
+    if (this.props.game.activeShape.cells.length) {
       return (
-        <div className="oponentContainer">
-          <div className="oponentDescription">
-            <h2>Oponent</h2>
+        <div className="opponentContainer">
+          <div className="opponentDescription">
+            <h2>Opponent</h2>
             <p>Name: William</p>
             <p>Location: Papua New Guinea</p>
             <p>Rank: 56</p>
           </div>
           <canvas
-            ref={this.canvasOponent}
+            ref={this.canvasOpponent}
             width={this.props.game.canvas.canvasMajor.width / 2}
             height={this.props.game.canvas.canvasMajor.height / 2}
             tabIndex="0"
@@ -75,13 +74,11 @@ class Oponent extends React.Component {
 
 }
 
-Oponent.defaultProps = {
+Opponent.defaultProps = {
   game: {},
-  user: {},
 };
-Oponent.propTypes = {
+Opponent.propTypes = {
   game: PropTypes.objectOf(PropTypes.any),
-  user: PropTypes.objectOf(PropTypes.any),
 };
 
-export default connect(mapStateToProps)(Oponent);
+export default connect(mapStateToProps)(Opponent);

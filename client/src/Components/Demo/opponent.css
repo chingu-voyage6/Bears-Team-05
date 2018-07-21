@@ -1,11 +1,11 @@
-.oponentContainer{
+.opponentContainer{
     margin-left: 30px;
     margin-right:30px;
     display: flex;
     flex-direction: column;
 }
 
-.oponentDescription{
+.opponentDescription{
     padding: 5px;
     display: flex;
     flex-direction: column;
