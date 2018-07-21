@@ -23,6 +23,12 @@ class Opponent extends React.Component {
     this.simulateTick();
   }
 
+  componentDidUpdate(prevProps) {
+    if (prevProps.game.points.totalLinesCleared !== this.props.game.points.totalLinesCleared) {
+      this.props.onFloorRaise();
+    }
+  }
+
   componentWillUnmount() {
     clearInterval(this.simulationInterval);
   }
@@ -40,6 +46,12 @@ class Opponent extends React.Component {
       drawBoundary(this.canvasOpponentContext, copyOfState);
       drawCells(this.canvasOpponentContext, copyOfState.activeShape, true);
       drawRuble(this.canvasOpponentContext, copyOfState, true);
+      if (this.props.gameOver) {
+        clearInterval(this.simulationInterval);
+        clearCanvas(this.canvasOpponentContext, copyOfState);
+        this.props.onReset();
+        this.simulateTick();
+      }
     }
   };
 
@@ -76,9 +88,15 @@ class Opponent extends React.Component {
 
 Opponent.defaultProps = {
   game: {},
+  onFloorRaise: null,
+  gameOver: false,
+  onReset: null,
 };
 Opponent.propTypes = {
   game: PropTypes.objectOf(PropTypes.any),
+  gameOver: PropTypes.bool,
+  onFloorRaise: PropTypes.func,
+  onReset: PropTypes.func,
 };
 
 export default connect(mapStateToProps)(Opponent);

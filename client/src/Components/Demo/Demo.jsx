@@ -43,6 +43,8 @@ class Demo extends React.Component {
     super(props);
     this.state = {
       multiPlayer: false,
+      difficulty: 2,
+      gameOver: false,
     };
     this.canvasMajor = React.createRef();
     this.canvasMinor = React.createRef();
@@ -53,9 +55,9 @@ class Demo extends React.Component {
   componentDidUpdate(prevProps) {
     if (Object.keys(prevProps.game).length) {
       if ((this.props.game.points.level !== prevProps.game.points.level) &&
-          (this.props.game.timerInterval > 250)) {
+          (this.props.game.timerInterval > 250) && (!this.state.multiPlayer)) {
         const l = setTimeout(() => {
-          this.endTick('Level Change');
+          this.endTick(false, 'Level Change');
           this.speedUp();
           clearTimeout(l);
         }, 250);
@@ -68,11 +70,14 @@ class Demo extends React.Component {
   }
 
   componentWillUnmount() {
-    this.endTick('componentWillUnmount');
+    this.endTick(true, 'componentWillUnmount');
   }
 
   resetBoard =async () => {
     await this.props.actions.gameReset();
+    this.setState({
+      gameOver: false,
+    });
     const canvasMajor = this.canvasMajor.current;
     const canvasMinor = this.canvasMinor.current;
     canvasMajor.focus();
@@ -81,14 +86,14 @@ class Demo extends React.Component {
     // setting context so it can be accesible everywhere in the class , maybe a better way ?
     this.canvasContextMajor = canvasMajor.getContext('2d');
     this.canvasContextMinor = canvasMinor.getContext('2d');
-    if (this.downInterval) this.endTick('reset Board');
+    if (this.downInterval) this.endTick(false, 'reset Board');
     this.startTick();
   }
 
-  startTick = () => {
+  startTick = (makeNewShape = true) => {
     this.abortCounter = 0;
     if (this.downInterval)clearInterval(this.downInterval);
-    this.newShape();
+    if (makeNewShape) this.newShape();
     this.downInterval = setInterval(() => {
       this.tick();
     }, this.props.game.timerInterval);
@@ -103,11 +108,19 @@ class Demo extends React.Component {
     this.drawScreen(copyOfActiveShape);
   }
 
-  endTick = async (c) => {
+  endTick = async (gameOver, comments) => {
     this.abortCounter += 1;
-    console.log(`Called by ${c} , attempts = ${this.abortCounter}`);
+    console.log(`Called by ${comments} , attempts = ${this.abortCounter}`);
     clearInterval(this.downInterval);
     await this.props.actions.pause(true);
+    if (gameOver) {
+      if (this.state.multiPlayer) {
+        this.setState({
+          gameOver: true,
+        });
+      }
+      clearCanvas(this.canvasContextMajor, this.props.game, true);
+    }
   }
 
   speedUp = async () => {
@@ -185,11 +198,11 @@ class Demo extends React.Component {
 
     // test for collision
     const collisionResult = runCollisionTest(this.props.game, locatedShape);
-    if (collisionResult && !collisionResult.length) this.endTick('collision check - game done');
+    if (collisionResult && !collisionResult.length) this.endTick(true, 'collision check - game done');
     else if (collisionResult && collisionResult.length) {
       if (collisionResult[1]) { // winner found
         // end tick to play animation and start tick back after animation is over
-        this.endTick('collision check - Win');
+        this.endTick(false, 'collision check - Win');
         clearCanvas(this.canvasContextMajor, this.props.game); // clear canvasMajor
         winRubble(
           this.canvasContextMajor,
@@ -202,7 +215,7 @@ class Demo extends React.Component {
           clearInterval(inter);
         }, 250);
       } else { // no winner found just set state with current rubble
-        this.endTick('collision check - No Win');
+        this.endTick(false, 'collision check - No Win');
         await this.props.actions.collide(collisionResult[0]);
         this.startTick();
       }
@@ -228,10 +241,13 @@ class Demo extends React.Component {
     await this.props.actions.pause(!this.props.game.paused);
   }
 
-  manualFloorRaise = async () => {
+  floorRaise = async () => {
+    this.endTick(false, 'floor raise');
     this.canvasMajor.current.focus();
     clearCanvas(this.canvasContextMajor, this.props.game, true); // clear canvasMajor
     await this.props.actions.raiseFloor(this.props.game.rubble);
+    const makeNewShape = !!this.state.multiPlayer;
+    this.startTick(makeNewShape);
   }
 
   gamePlay = (e) => {
@@ -244,9 +260,10 @@ class Demo extends React.Component {
 
   handleMultiplayer = () => {
     if (this.props.user.authenticated) {
+      this.endTick(false, 'multiPlayer selected');
       this.setState({
         multiPlayer: !this.state.multiPlayer,
-      });
+      }, () => this.resetBoard());
     } else {
       window.location = '/login';
     }
@@ -261,7 +278,7 @@ class Demo extends React.Component {
             onReset={() => this.resetBoard()}
             game={this.props.game}
             onhandlePause={() => this.handlePause}
-            onFloorRaise={() => this.manualFloorRaise()}
+            onFloorRaise={() => this.floorRaise()}
             multiPlayer={this.state.multiPlayer}
             onMultiPlayer={() => this.handleMultiplayer}
           />
@@ -273,7 +290,12 @@ class Demo extends React.Component {
             onKeyDown={e => this.gamePlay(e)}
           />
           {this.state.multiPlayer ?
-            <Opponent />
+            <Opponent
+              onFloorRaise={() => this.floorRaise()}
+              gameOver={this.state.gameOver}
+              difficulty={this.state.difficulty}
+              onReset={() => this.resetBoard()}
+            />
             :
             null
           }
