@@ -12,10 +12,12 @@ import { gameReset, nextShape, updateScreen,
 import tetrisShapes from './scripts/shapes';
 import shapeLocator from './scripts/locateShape';
 import { runCollisionTest } from './scripts/collision';
-import { clearCanvas, drawShape, drawRuble, winRubble, drawNextShape, drawBoundary, drawCells } from './scripts/canvas';
+import { clearCanvas, drawShape,
+  drawRuble, winRubble, drawNextShape, drawBoundary, drawCells } from './scripts/canvas';
 import playerMoves from './scripts/player';
 // react Components
 import Controls from './controls';
+import Oponent from './opponent';
 
 // reads from store
 const mapStateToProps = state => state;
@@ -256,6 +258,7 @@ class Demo extends React.Component {
             tabIndex="0"
             onKeyDown={e => this.gamePlay(e)}
           />
+          <Oponent />
         </div>
       );
     }

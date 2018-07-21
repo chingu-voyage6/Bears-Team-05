@@ -1,0 +1,17 @@
+.oponentContainer{
+    margin-left: 30px;
+    margin-right:30px;
+    display: flex;
+    flex-direction: column;
+}
+
+.oponentDescription{
+    padding: 5px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-start;
+    background: rgb(192, 191, 191);
+    font-size: 15px;
+    height: 50%;
+}

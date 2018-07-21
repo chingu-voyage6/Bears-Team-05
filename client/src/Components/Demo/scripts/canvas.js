@@ -2,7 +2,7 @@ import tetrisShapes from './shapes';
 import shapeLocator from './locateShape';
 import floorPattern from '../../../assets/pattern.bmp';
 
-export const drawCells = (ctx, shape) => {
+export const drawCells = (ctx, shape, oponent = false) => {
   const canvasContext = ctx;
   const b = shape.unitBlockSize;
   shape.cells.forEach((c) => {
@@ -11,6 +11,10 @@ export const drawCells = (ctx, shape) => {
     canvasContext.strokeStyle = 'grey';
     canvasContext.rect(c[0] * b, c[1] * b, b, b);
     canvasContext.stroke();
+    if (oponent) {
+      canvasContext.fillStyle = tetrisShapes[shape.name].color;
+      canvasContext.fill();
+    }
   });
 };
 
@@ -37,7 +41,7 @@ export const drawGridSpecial = (x, y, occupied, b, ctx) => {
   }
 };
 
-export const drawRuble = (ctx, state) => {
+export const drawRuble = (ctx, state, oponent = false) => {
   const canvasContext = ctx;
   const b = state.activeShape.unitBlockSize;
 
@@ -52,7 +56,7 @@ export const drawRuble = (ctx, state) => {
     canvasContext.fillRect(x * b, y * b, b, b);
     // draw borders for rubble
     canvasContext.beginPath();
-    canvasContext.lineWidth = '3';
+    canvasContext.lineWidth = oponent ? '2' : '3';
     canvasContext.strokeStyle = 'grey';
     canvasContext.rect(x * b, y * b, b, b);
     canvasContext.stroke();
