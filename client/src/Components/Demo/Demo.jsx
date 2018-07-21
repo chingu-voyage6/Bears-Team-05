@@ -2,6 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import './Demo.css';
 
+import { socket } from '../../Actions/socket';
+import { SIMULATE_GAMEPLAY } from '../../constants';
 // connect to redux and get action creators
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
@@ -233,6 +235,7 @@ class Demo extends React.Component {
       }
       await this.props.actions.updateScreen(data);
     }
+    socket.emit(SIMULATE_GAMEPLAY, JSON.stringify(this.props.game));
   }
 
   /* Handle Player Events Below */
