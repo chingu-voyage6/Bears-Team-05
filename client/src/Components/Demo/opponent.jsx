@@ -22,7 +22,7 @@ class Opponent extends React.Component {
     super(props);
     this.state = {
       gameState: {},
-      gameInProgress: false,
+      gameInProgress: ['', 0], // [status, data]
       playerPool: [],
       selfSocketId: '',
     };
@@ -34,6 +34,7 @@ class Opponent extends React.Component {
     });
     */
     socket.on('CURRENT_POOL', pool => this.processPool(pool));
+    socket.on('INVITATION_RECEIVED', invitedBy => this.processInvite(invitedBy));
   }
   componentDidMount() {
     socket.emit('PLAYER_JOINED', JSON.stringify(this.props.user));
@@ -93,15 +94,23 @@ class Opponent extends React.Component {
     });
   }
 
-  requestPlay = p => console.log('you are requesting to play with ', p);
+  processInvite = (p) => {
+    this.setState({
+      gameInProgress: ['Invite', p],
+    });
+  }
+
+  requestInvite = (p) => {
+    socket.emit('INVITATION_SENT', p);
+  }
 
   opponentDescription = () => {
-    if (!this.state.gameInProgress) { // to render before an invitation
+    if (!this.state.gameInProgress[0]) { // to render before an invitation
       const players = this.state.playerPool.map(p => (
         <button
           className="playersbutton"
           key={p}
-          onClick={() => this.requestPlay(p)}
+          onClick={() => this.requestInvite(p)}
         >{p}
         </button>));
       if (this.state.playerPool.length) {
@@ -115,6 +124,17 @@ class Opponent extends React.Component {
       return (
         <div className="opponentDescription">
           No opponents avalilable at the moment, check back later !!
+        </div>
+      );
+    }
+    if (this.state.gameInProgress[0] === 'Invite') {
+      return (
+        <div className="opponentDescription">
+          <div className="Invitation">
+            <p className="Invite">{`An Invite has been sent from ${this.state.gameInProgress[1]}`}</p>
+            <button className="button-accept-invitation">Accept</button>
+            <button className="button-decline-invitation">Decline</button>
+          </div>
         </div>
       );
     }

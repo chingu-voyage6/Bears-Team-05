@@ -36,6 +36,10 @@ module.exports = (socket) => {
       ...playerPool.slice(indexOfDisconnected + 1)];
     io.emit('CURRENT_POOL', profileResponder(socket.id));
   });
+
+  socket.on('INVITATION_SENT', (sId) => {
+    io.to(sId).emit('INVITATION_RECEIVED', socket.id);
+  });
   /*
   socket.on(SIMULATE_GAMEPLAY, (gameState) => {
     if (players.length !== 2) return;
