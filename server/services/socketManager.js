@@ -2,6 +2,7 @@ const { io } = require('../index');
 const { USER_CONNECTED } = require('../../client/src/constants');
 
 let playerPool = [];
+const activePlayers = [];
 const profileResponder = socketId => (
   { // need self socket id to segregate on client
     pool: playerPool,
@@ -40,13 +41,26 @@ module.exports = (socket) => {
   socket.on('INVITATION_SENT', (sId) => {
     io.to(sId).emit('INVITATION_RECEIVED', socket.id);
   });
-  /*
-  socket.on(SIMULATE_GAMEPLAY, (gameState) => {
-    if (players.length !== 2) return;
-    // look for opponents
-    const opponentSocketId = players.filter(p => p.id !== socket.id);
-    io.to(opponentSocketId[0].id).emit('fromPlayer', gameState);
+
+  socket.on('INVITATION_ACCEPTED', (players) => {
+    const playerAIndex = playerPool.findIndex(p =>
+      players[0] === p.socketId);
+    const playerBIndex = playerPool.findIndex(p =>
+      players[1] === p.socketId);
+    const playerA = playerPool[playerAIndex];
+    const playerB = playerPool[playerBIndex];
+    io.to(players[0]).emit('START_GAME', playerB); // emit the opponents
+    io.to(players[1]).emit('START_GAME', playerA);
+    // remove socekt IDs from room and add to active Players
+    for (let i = 0; i < players.length; i += 1) {
+      const poolIds = playerPool.map(p => p.socketId);
+      if (poolIds.includes(players[i])) {
+        const indxOfPlayer = poolIds.indexOf(players[i]);
+        playerPool.splice(indxOfPlayer, 1);
+      }
+    }
+    activePlayers.push(players);
+    io.emit('CURRENT_POOL', profileResponder(socket.id));
   });
-  */
 };
 

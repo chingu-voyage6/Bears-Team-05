@@ -25,6 +25,7 @@ class Opponent extends React.Component {
       gameInProgress: ['', 0], // [status, data]
       playerPool: [],
       selfSocketId: '',
+      opponent: {},
     };
     this.canvasOpponent = React.createRef();
     // socket.open();
@@ -35,6 +36,7 @@ class Opponent extends React.Component {
     */
     socket.on('CURRENT_POOL', pool => this.processPool(pool));
     socket.on('INVITATION_RECEIVED', invitedBy => this.processInvite(invitedBy));
+    socket.on('START_GAME', opp => this.processGameStart(opp));
   }
   componentDidMount() {
     socket.emit('PLAYER_JOINED', JSON.stringify(this.props.user));
@@ -75,17 +77,17 @@ class Opponent extends React.Component {
     }
   };
 
+  /* process socket-in-coming below */
   processSocket = (msg) => {
     this.setState(JSON.parse(msg), () => this.setGame());
   }
 
   processPool = (poolData) => {
-    // filter out the client's own socket id
     const checkSelfSocketId = this.state.selfSocketId === '' ? poolData.self : this.state.selfSocketId;
     const nonSelfPoolData = poolData.pool.filter(p => p.socketId !== checkSelfSocketId);
     const playerChoices = [];
     nonSelfPoolData.forEach((sock, idx) => {
-      if (idx < 5) playerChoices.push(sock.socketId);
+      if (idx < 5) playerChoices.push(sock);
     });
 
     this.setState({
@@ -100,18 +102,51 @@ class Opponent extends React.Component {
     });
   }
 
+  processGameStart = (opp) => {
+    this.setState({
+      opponent: opp,
+    });
+    let startCounter = 15;
+    const gameStartId = setInterval(() => {
+      this.setState({
+        gameInProgress: ['Playing', startCounter],
+      });
+      startCounter -= 1;
+      if (startCounter < 0)clearInterval(gameStartId);
+    }, 1000);
+  }
+  /* process socket-out-going below */
   requestInvite = (p) => {
     socket.emit('INVITATION_SENT', p);
   }
 
+  acceptInvite = () => {
+    /*
+    const opponentIndex = this.state.playerPool.findIndex(p =>
+      this.state.gameInProgress[1] === p.socketId);
+      // identify self to opponent
+    const selfInfo = Object.assign({}, this.props.user);
+    selfInfo.socketId = this.state.selfSocketId;
+    console.log(this.state.gameInProgress[1])
+
+    this.setState({
+      opponent: this.state.gameInProgress[1] === this.state.selfSocketId ?
+        this.state.playerPool[opponentIndex]
+        :
+        selfInfo,
+    }, () =>
+    */
+    socket.emit('INVITATION_ACCEPTED', [this.state.selfSocketId, this.state.gameInProgress[1]]);
+  }
+  /* opponent top part of component */
   opponentDescription = () => {
     if (!this.state.gameInProgress[0]) { // to render before an invitation
       const players = this.state.playerPool.map(p => (
         <button
           className="playersbutton"
-          key={p}
-          onClick={() => this.requestInvite(p)}
-        >{p}
+          key={p.socketId}
+          onClick={() => this.requestInvite(p.socketId)}
+        >{p.socketId}
         </button>));
       if (this.state.playerPool.length) {
         return (
@@ -132,8 +167,19 @@ class Opponent extends React.Component {
         <div className="opponentDescription">
           <div className="Invitation">
             <p className="Invite">{`An Invite has been sent from ${this.state.gameInProgress[1]}`}</p>
-            <button className="button-accept-invitation">Accept</button>
+            <button className="button-accept-invitation" onClick={() => this.acceptInvite()}>Accept</button>
             <button className="button-decline-invitation">Decline</button>
+          </div>
+        </div>
+      );
+    }
+    if (this.state.gameInProgress[0] === 'Playing') {
+      return ( // to render on game
+        <div className="opponentDescription">
+          <div className="Timer">
+            <h4>Game About to Start with</h4>
+            <p className="countdown">{this.state.opponent.socketId}</p>
+            <p className="countdown">in {this.state.gameInProgress[1]} Seconds</p>
           </div>
         </div>
       );
@@ -141,7 +187,7 @@ class Opponent extends React.Component {
     return ( // to render on game
       <div className="opponentDescription">
         <h2>Opponent</h2>
-        <p>Name: William</p>
+        <p>Name: {this.state.gameInProgress[0]}</p>
         <p>Location: Papua New Guinea</p>
         <p>Rank: 56</p>
       </div>
