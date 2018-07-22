@@ -9,9 +9,13 @@
     padding: 5px;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
     align-items: flex-start;
     background: rgb(192, 191, 191);
     font-size: 15px;
     height: 50%;
+}
+
+li{
+    cursor: pointer;
+    margin:10px;
 }

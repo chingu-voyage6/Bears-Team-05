@@ -12,15 +12,7 @@ const Controls = (props) => {
           height={props.game.canvas.canvasMinor.height}
           tabIndex="0"
         />
-        <label htmlFor="test">
-          Multi Player
-          <input
-            name="Multiplayer"
-            type="checkbox"
-            checked={props.multiPlayer}
-            onChange={props.onMultiPlayer()}
-          />
-        </label>
+        <button className="buttonmulti-multi" onClick={props.onMultiPlayer()}>Multi Player</button>
         <button className="reset" onClick={() => props.onReset()}>
               Reset
         </button>
@@ -51,15 +43,7 @@ const Controls = (props) => {
         height={props.game.canvas.canvasMinor.height}
         tabIndex="0"
       />
-      <label htmlFor="test">
-          Multi Player
-        <input
-          name="Multiplayer"
-          type="checkbox"
-          checked={props.multiPlayer}
-          onChange={props.onMultiPlayer()}
-        />
-      </label>
+      <button className="buttonmulti-single" onClick={props.onMultiPlayer()}>Single Player</button>
       <label htmlFor="test">Lines Cleared = {props.game.points.totalLinesCleared}</label>
       <label htmlFor="test">Difficulty = {2}</label>
     </div>
