@@ -24,6 +24,7 @@ class Opponent extends React.Component {
       gameState: {},
       gameInProgress: false,
       playerPool: [],
+      selfSocketId: '',
     };
     this.canvasOpponent = React.createRef();
     // socket.open();
@@ -49,7 +50,7 @@ class Opponent extends React.Component {
   }
 
   componentWillUnmount() {
-    // socket.disconnect();
+    socket.emit('REMOVE_PLAYER', this.state.selfSocketId);
   }
 
 
@@ -79,7 +80,8 @@ class Opponent extends React.Component {
 
   processPool = (poolData) => {
     // filter out the client's own socket id
-    const nonSelfPoolData = poolData.pool.filter(p => p.socketId !== poolData.self);
+    const checkSelfSocketId = this.state.selfSocketId === '' ? poolData.self : this.state.selfSocketId;
+    const nonSelfPoolData = poolData.pool.filter(p => p.socketId !== checkSelfSocketId);
     const playerChoices = [];
     nonSelfPoolData.forEach((sock, idx) => {
       if (idx < 5) playerChoices.push(sock.socketId);
@@ -87,16 +89,32 @@ class Opponent extends React.Component {
 
     this.setState({
       playerPool: playerChoices,
+      selfSocketId: this.state.selfSocketId === '' ? poolData.self : this.state.selfSocketId,
     });
   }
 
+  requestPlay = p => console.log('you are requesting to play with ', p);
+
   opponentDescription = () => {
     if (!this.state.gameInProgress) { // to render before an invitation
-      const players = this.state.playerPool.map(p => <li key={p}>{p}</li>);
+      const players = this.state.playerPool.map(p => (
+        <button
+          className="playersbutton"
+          key={p}
+          onClick={() => this.requestPlay(p)}
+        >{p}
+        </button>));
+      if (this.state.playerPool.length) {
+        return (
+          <div className="opponentDescription">
+            Click on player to send an Invitation
+            {players}
+          </div>
+        );
+      }
       return (
         <div className="opponentDescription">
-          Click on player to send an Invitation
-          <ul>{players}</ul>
+          No opponents avalilable at the moment, check back later !!
         </div>
       );
     }
@@ -118,8 +136,6 @@ class Opponent extends React.Component {
             ref={this.canvasOpponent}
             width={this.props.game.canvas.canvasMajor.width / 2}
             height={this.props.game.canvas.canvasMajor.height / 2}
-            tabIndex="0"
-            onKeyDown={e => this.gamePlay(e)}
           />
         </div>
       );

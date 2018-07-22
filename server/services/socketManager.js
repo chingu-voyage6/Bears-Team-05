@@ -2,6 +2,12 @@ const { io } = require('../index');
 const { USER_CONNECTED } = require('../../client/src/constants');
 
 let playerPool = [];
+const profileResponder = socketId => (
+  { // need self socket id to segregate on client
+    pool: playerPool,
+    self: socketId,
+  }
+);
 module.exports = (socket) => {
   socket.on(USER_CONNECTED, (user) => {
     console.log(`test log msg from client side: ${user}`);
@@ -9,10 +15,10 @@ module.exports = (socket) => {
     io.emit(USER_CONNECTED, user);
   });
   socket.on('disconnect', () => {
-    const indexOfDisconnected = playerPool.findIndex(s => s.id === socket.id);
+    const indexOfDisconnected = playerPool.findIndex(s => s.socketId === socket.id);
     playerPool = [...playerPool.slice(0, indexOfDisconnected),
       ...playerPool.slice(indexOfDisconnected + 1)];
-    console.log('disconnected, remaining playerPool', playerPool.length);
+    io.emit('CURRENT_POOL', profileResponder(socket.id));
   });
 
   // Playe pool set up
@@ -21,11 +27,14 @@ module.exports = (socket) => {
     const playerProfile = JSON.parse(profile);
     playerProfile.socketId = socket.id; // attach socket Id to profile
     playerPool.push(playerProfile);
-    const responseWithProfiles = { // need self socket id to segregate on client
-      pool: playerPool,
-      self: socket.id,
-    };
-    io.emit('CURRENT_POOL', (responseWithProfiles));
+    io.emit('CURRENT_POOL', profileResponder(socket.id));
+  });
+
+  socket.on('REMOVE_PLAYER', (player) => {
+    const indexOfDisconnected = playerPool.findIndex(s => s.socketId === player);
+    playerPool = [...playerPool.slice(0, indexOfDisconnected),
+      ...playerPool.slice(indexOfDisconnected + 1)];
+    io.emit('CURRENT_POOL', profileResponder(socket.id));
   });
   /*
   socket.on(SIMULATE_GAMEPLAY, (gameState) => {
@@ -36,3 +45,4 @@ module.exports = (socket) => {
   });
   */
 };
+

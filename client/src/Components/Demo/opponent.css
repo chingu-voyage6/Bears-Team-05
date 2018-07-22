@@ -6,16 +6,21 @@
 }
 
 .opponentDescription{
-    padding: 5px;
     display: flex;
+    width: 150px;
     flex-direction: column;
     align-items: flex-start;
     background: rgb(192, 191, 191);
     font-size: 15px;
     height: 50%;
+    padding: 0;
 }
 
-li{
-    cursor: pointer;
-    margin:10px;
+.playersbutton{
+    width: 90%;
+    height: 30px;
+    font-size: 10px;
+    margin:0 auto;
+    margin-top:5px;
+    background:rgb(191, 123, 236);
 }
