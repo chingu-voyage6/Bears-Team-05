@@ -1,10 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import './Demo.css';
-/*
+
 import { socket } from '../../Actions/socket';
 import { SIMULATE_GAMEPLAY } from '../../constants';
-*/
 // connect to redux and get action creators
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
@@ -48,6 +47,7 @@ class Demo extends React.Component {
       multiPlayer: false,
       difficulty: 2,
       gameOver: false,
+      emitGame: false, // will hold socket to emit game to
     };
     this.canvasMajor = React.createRef();
     this.canvasMinor = React.createRef();
@@ -237,7 +237,12 @@ class Demo extends React.Component {
       await this.props.actions.updateScreen(data);
     }
     // if (this.state.multiPlayer) socket.emit(SIMULATE_GAMEPLAY, JSON.stringify(this.props.game));
-    // if (this.state.multiPlayer) socket.emit(SIMULATE_GAMEPLAY, JSON.stringify(this.props.game));
+    if (this.state.emitGame) {
+      socket.emit(
+        SIMULATE_GAMEPLAY,
+        { gameState: JSON.stringify(this.props.game), socketId: this.state.emitGame },
+      );
+    }
   }
 
   /* Handle Player Events Below */
@@ -251,8 +256,8 @@ class Demo extends React.Component {
     this.canvasMajor.current.focus();
     clearCanvas(this.canvasContextMajor, this.props.game, true); // clear canvasMajor
     await this.props.actions.raiseFloor(this.props.game.rubble);
-    const makeNewShape = !!this.state.multiPlayer;
-    this.startTick(makeNewShape);
+    // const makeNewShape = !!this.state.multiPlayer;
+    this.startTick(false);
   }
 
   gamePlay = (e) => {
@@ -274,6 +279,11 @@ class Demo extends React.Component {
     }
   }
 
+  gameEmit = (sock) => {
+    this.setState({
+      emitGame: sock.socketId,
+    }, () => this.resetBoard());
+  }
   render() {
     if (Object.keys(this.props.game).length) {
       return (
@@ -300,6 +310,7 @@ class Demo extends React.Component {
               gameOver={this.state.gameOver}
               difficulty={this.state.difficulty}
               onReset={() => this.resetBoard()}
+              onGameEmit={toSocket => this.gameEmit(toSocket)}
             />
             :
             null

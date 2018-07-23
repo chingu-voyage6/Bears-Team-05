@@ -1,5 +1,5 @@
 const { io } = require('../index');
-const { USER_CONNECTED } = require('../../client/src/constants');
+const { USER_CONNECTED, SIMULATE_GAMEPLAY } = require('../../client/src/constants');
 
 let playerPool = [];
 const activePlayers = [];
@@ -61,6 +61,10 @@ module.exports = (socket) => {
     }
     activePlayers.push(players);
     io.emit('CURRENT_POOL', profileResponder(socket.id));
+  });
+
+  socket.on(SIMULATE_GAMEPLAY, (msg) => {
+    io.to(msg.socketId).emit(SIMULATE_GAMEPLAY, msg.gameState); // emit the opponents
   });
 };
 

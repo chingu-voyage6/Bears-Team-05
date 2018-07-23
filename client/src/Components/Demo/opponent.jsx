@@ -4,11 +4,11 @@ import './opponent.css';
 
 // connect to redux
 import { connect } from 'react-redux';
-/*
+
 import {
   SIMULATE_GAMEPLAY,
 } from '../../constants';
-*/
+
 import { socket } from '../../Actions/socket';
 import { clearCanvas, drawRuble, drawBoundary, drawCells } from './scripts/canvas';
 
@@ -28,15 +28,11 @@ class Opponent extends React.Component {
       opponent: {},
     };
     this.canvasOpponent = React.createRef();
-    // socket.open();
-    /*
-    socket.on('fromPlayer', (msg) => {
-      this.processSocket(msg);
-    });
-    */
+
     socket.on('CURRENT_POOL', pool => this.processPool(pool));
     socket.on('INVITATION_RECEIVED', invitedBy => this.processInvite(invitedBy));
     socket.on('START_GAME', opp => this.processGameStart(opp));
+    socket.on(SIMULATE_GAMEPLAY, oppGame => this.processSocket(oppGame));
   }
   componentDidMount() {
     socket.emit('PLAYER_JOINED', JSON.stringify(this.props.user));
@@ -58,9 +54,9 @@ class Opponent extends React.Component {
 
 
   setGame = () => {
-    if (Object.keys(this.state).length) {
+    if (Object.keys(this.state.gameState).length) {
       // full deep copy of game state needed as object mutation becomes a problem
-      const copyOfState = JSON.parse(JSON.stringify(this.state));
+      const copyOfState = JSON.parse(JSON.stringify(this.state.gameState));
       const canvasOpponent = this.canvasOpponent.current;
       canvasOpponent.style.backgroundColor = 'black';
       this.canvasOpponentContext = canvasOpponent.getContext('2d');
@@ -79,7 +75,9 @@ class Opponent extends React.Component {
 
   /* process socket-in-coming below */
   processSocket = (msg) => {
-    this.setState(JSON.parse(msg), () => this.setGame());
+    const copyOfState = JSON.parse(JSON.stringify(this.state));
+    copyOfState.gameState = JSON.parse(msg);
+    this.setState(copyOfState, () => this.setGame());
   }
 
   processPool = (poolData) => {
@@ -109,10 +107,17 @@ class Opponent extends React.Component {
     let startCounter = 15;
     const gameStartId = setInterval(() => {
       this.setState({
-        gameInProgress: ['Playing', startCounter],
+        gameInProgress: ['PreGame', startCounter],
       });
       startCounter -= 1;
-      if (startCounter < 0)clearInterval(gameStartId);
+      if (startCounter <= 0) {
+        this.setState({
+          gameInProgress: ['Playing', null],
+        });
+        this.props.onGameEmit(opp);
+        this.props.onReset();
+        clearInterval(gameStartId);
+      }
     }, 1000);
   }
   /* process socket-out-going below */
@@ -121,21 +126,6 @@ class Opponent extends React.Component {
   }
 
   acceptInvite = () => {
-    /*
-    const opponentIndex = this.state.playerPool.findIndex(p =>
-      this.state.gameInProgress[1] === p.socketId);
-      // identify self to opponent
-    const selfInfo = Object.assign({}, this.props.user);
-    selfInfo.socketId = this.state.selfSocketId;
-    console.log(this.state.gameInProgress[1])
-
-    this.setState({
-      opponent: this.state.gameInProgress[1] === this.state.selfSocketId ?
-        this.state.playerPool[opponentIndex]
-        :
-        selfInfo,
-    }, () =>
-    */
     socket.emit('INVITATION_ACCEPTED', [this.state.selfSocketId, this.state.gameInProgress[1]]);
   }
   /* opponent top part of component */
@@ -173,7 +163,7 @@ class Opponent extends React.Component {
         </div>
       );
     }
-    if (this.state.gameInProgress[0] === 'Playing') {
+    if (this.state.gameInProgress[0] === 'PreGame') {
       return ( // to render on game
         <div className="opponentDescription">
           <div className="Timer">
@@ -187,7 +177,7 @@ class Opponent extends React.Component {
     return ( // to render on game
       <div className="opponentDescription">
         <h2>Opponent</h2>
-        <p>Name: {this.state.gameInProgress[0]}</p>
+        <p>Name: {this.state.opponent.socketId}</p>
         <p>Location: Papua New Guinea</p>
         <p>Rank: 56</p>
       </div>
@@ -217,6 +207,7 @@ Opponent.defaultProps = {
   onFloorRaise: null,
   gameOver: false,
   onReset: null,
+  onGameEmit: null,
 };
 Opponent.propTypes = {
   game: PropTypes.objectOf(PropTypes.any),
@@ -224,6 +215,7 @@ Opponent.propTypes = {
   gameOver: PropTypes.bool,
   onFloorRaise: PropTypes.func,
   onReset: PropTypes.func,
+  onGameEmit: PropTypes.func,
 };
 
 export default connect(mapStateToProps)(Opponent);
