@@ -28,11 +28,12 @@ const fillBlankRows = (occupied, state) => {
   const yCoord = xyCoord.map(y => Number(y.split('-')[1]));
   // find max height of all the occupied cells (since canvas positive y is down use min)
   const heightOccupied = Math.min(...yCoord);
-  const screenHeight = (state.canvas.canvasMajor.height / state.activeShape.unitBlockSize) - 1;
   const screenWidth = (state.canvas.canvasMajor.width / state.activeShape.unitBlockSize) - 1;
+  let boundaryHeight = state.rubble.boundaryCells.map(c => Number(c.split('-')[1]));
+  boundaryHeight = Math.min(...boundaryHeight) - 1;
   let blankFound;
   // scan thru all the potential cells within occupied
-  for (let y = heightOccupied; y <= screenHeight; y += 1) {
+  for (let y = heightOccupied; y <= boundaryHeight; y += 1) {
     if (blankFound) break;
     for (let x = 0; x <= screenWidth; x += 1) {
       const testCoord = `${x}-${y}`;
@@ -50,7 +51,7 @@ const fillBlankRows = (occupied, state) => {
       const oldY = Number(c[0].split('-')[1]);
       if (oldY === (blankFound - 1)) {
         const oldX = Number(c[0].split('-')[0]);
-        newOccupied.push([(`${oldX}-${oldY + 1}`), c[1]]);
+        newOccupied.push([`${oldX}-${oldY + 1}`, c[1]]);
       } else {
         newOccupied.push(c);
       }
@@ -83,7 +84,7 @@ const clearRows = (occupied, winners, state) => {
   return fillBlankRows(occupied, state);
 };
 
-const runCollision = (state, shapeTested) => {
+export const runCollisionTest = (state, shapeTested) => {
   const occupiedCellLocations = state.rubble.occupiedCells.map(c => c[0]);
   // shape to test for collison
   const testedShape = shapeTested.cells.map(c => c.join('-'));
@@ -96,20 +97,53 @@ const runCollision = (state, shapeTested) => {
   // upperBoundary ocupied cells
   const isUpperBoundary = shapeTested.cells.filter(c => c[1] === 0);
   if (isOccupied.length || isLowerBoundary.length) { // collision detected
-    if (isUpperBoundary.length) return 'done';
+    if (isUpperBoundary.length) return [];// game over
+    let collisionData;
     // add color info to active shape
     preCollisionShape = preCollisionShape.map(c => [c, tetrisShapes[state.activeShape.name].color]);
     // add active shaped to occupied cells
     const newOccupied = [...state.rubble.occupiedCells, ...preCollisionShape];
     // test for winner
     const winners = winCheck(newOccupied, state);
+    const copyOfRubble = Object.assign({}, state.rubble);
+    const copyOfPoints = Object.assign({}, state.points);
     if (winners.length) {
-      return [clearRows(newOccupied, winners, state), winners];
+      // assign points if winner found
+      copyOfPoints.totalLinesCleared = state.points.totalLinesCleared + winners.length;
+      copyOfPoints.level = Math.floor(copyOfPoints.totalLinesCleared /
+       (state.points.levelUp));
+      // assign new rubble coordinates
+      copyOfRubble.occupiedCells = clearRows(newOccupied, winners, state);
+      copyOfRubble.winRows = winners;
+
+      collisionData = {
+        rubble: copyOfRubble,
+        points: copyOfPoints,
+      };
+      // winner return
+      return [collisionData, winners, isLowerBoundary.length];
     }
-    return [newOccupied, null];
+    copyOfRubble.occupiedCells = newOccupied;
+    collisionData = {
+      rubble: copyOfRubble,
+      points: copyOfPoints, // unchanged
+    };
+    // plain collision return
+    return [collisionData, null, isLowerBoundary.length];
   }
-  return false; // no collision detected
+  return null; // no collision return
 };
 
-export default runCollision;
 
+export const getSideBlock = (direction, state) => {
+  // checks for player x-direction movement obstructions
+  const cellCheck = state.activeShape.cells.map((c) => {
+    if (direction === 'L') {
+      return [c[0] - 1, c[1]].join('-');
+    }
+    return [c[0] + 1, c[1]].join('-');
+  });
+  const occupiedCellLocations = state.rubble.occupiedCells.map(c => c[0]);
+  const blocked = cellCheck.filter(c => occupiedCellLocations.includes(c));
+  return !!blocked.length;
+};

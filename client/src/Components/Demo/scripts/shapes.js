@@ -1,4 +1,9 @@
 const tetrisShapes = {
+  getRandShapeName: () => {
+    const shapeList = ['shapeL', 'shapeZ', 'shapeT', 'shapeI', 'shapeJ', 'shapeO', 'shapeS'];
+    const randNum = Math.floor(Math.random() * (shapeList.length));
+    return shapeList[randNum];
+  },
   getDims: (activeShape) => {
     const absoluteVertices = tetrisShapes.getAbsoluteVertices(
       activeShape.unitBlockSize,

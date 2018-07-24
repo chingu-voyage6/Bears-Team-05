@@ -1,17 +1,19 @@
 import {
   INITIALIZE_GAME, LEVEL_UP, PAUSE,
-  GET_NEXT_SHAPE, SCREEN_UPDATE, LOCATE_SHAPE, COLLISION,
+  GET_NEXT_SHAPE, SCREEN_UPDATE, RAISE_FLOOR, COLLISION,
 } from '../constants/index';
 
 
-const initializeBoundry = (unitBlockSize, width, height) => {
-  const initialBoundry = [];
+const setBoundry = (unitBlockSize, width, height, boundryRowHeight) => {
+  const boundry = [];
   const blocksPerRow = width / unitBlockSize;
   const blocksPerColumn = height / unitBlockSize;
-  for (let i = 0; i < blocksPerRow; i += 1) {
-    initialBoundry.push(`${i}-${blocksPerColumn}`);
+  for (let j = 0; j < boundryRowHeight; j += 1) {
+    for (let i = 0; i < blocksPerRow; i += 1) {
+      boundry.push(`${i}-${blocksPerColumn - j}`);
+    }
   }
-  return initialBoundry;
+  return boundry;
 };
 const initialState = { // determine what needs to go into state, a very small portion here
   timerInterval: 700,
@@ -51,10 +53,11 @@ const initialState = { // determine what needs to go into state, a very small po
 
 
 export const gameReset = () => {
-  initialState.rubble.boundaryCells = initializeBoundry(
+  initialState.rubble.boundaryCells = setBoundry(
     initialState.activeShape.unitBlockSize,
     initialState.canvas.canvasMajor.width,
     initialState.canvas.canvasMajor.height,
+    1,
   );
   return (
     {
@@ -92,12 +95,32 @@ export const updateScreen = data => (
   }
 );
 
-export const locateShape = locatedShape => (
-  {
-    type: LOCATE_SHAPE,
-    payload: locatedShape,
-  }
-);
+export const raiseFloor = (oldRubble) => {
+  const newOccupied = oldRubble.occupiedCells.map((c) => {
+    const oldY = Number(c[0].split('-')[1]);
+    const oldX = Number(c[0].split('-')[0]);
+    return ([`${oldX}-${oldY - 1}`, c[1]]);
+  });
+
+  const yBoundary = oldRubble.boundaryCells.map(c => Number(c.split('-')[1]));
+  const oldHeight = Array.from(new Set(yBoundary)).length;
+  const newBoundary = setBoundry(
+    initialState.activeShape.unitBlockSize,
+    initialState.canvas.canvasMajor.width,
+    initialState.canvas.canvasMajor.height,
+    oldHeight + 1,
+  );
+  return (
+    {
+      type: RAISE_FLOOR,
+      payload: {
+        occupiedCells: newOccupied,
+        boundaryCells: newBoundary,
+        winRows: null,
+      },
+    }
+  );
+};
 
 export const collide = data => (
   {
