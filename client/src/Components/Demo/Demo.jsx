@@ -46,7 +46,6 @@ class Demo extends React.Component {
     this.state = {
       multiPlayer: false,
       difficulty: 2,
-      gameOver: false,
       emitGame: false, // will hold socket to emit game to
     };
     this.canvasMajor = React.createRef();
@@ -76,11 +75,8 @@ class Demo extends React.Component {
     this.endTick(true, 'componentWillUnmount');
   }
 
-  resetBoard =async () => {
+  resetBoard =async (reStart = true) => {
     await this.props.actions.gameReset();
-    this.setState({
-      gameOver: false,
-    });
     const canvasMajor = this.canvasMajor.current;
     const canvasMinor = this.canvasMinor.current;
     canvasMajor.focus();
@@ -90,7 +86,7 @@ class Demo extends React.Component {
     this.canvasContextMajor = canvasMajor.getContext('2d');
     this.canvasContextMinor = canvasMinor.getContext('2d');
     if (this.downInterval) this.endTick(false, 'reset Board');
-    this.startTick();
+    if (reStart) this.startTick();
   }
 
   startTick = (makeNewShape = true) => {
@@ -117,11 +113,6 @@ class Demo extends React.Component {
     clearInterval(this.downInterval);
     await this.props.actions.pause(true);
     if (gameOver) {
-      if (this.state.multiPlayer) {
-        this.setState({
-          gameOver: true,
-        });
-      }
       clearCanvas(this.canvasContextMajor, this.props.game, true);
     }
   }
@@ -201,8 +192,15 @@ class Demo extends React.Component {
 
     // test for collision
     const collisionResult = runCollisionTest(this.props.game, locatedShape);
-    if (collisionResult && !collisionResult.length) this.endTick(true, 'collision check - game done');
-    else if (collisionResult && collisionResult.length) {
+    if (collisionResult && !collisionResult.length) {
+      this.endTick(true, 'collision check - game done');
+      if (this.state.emitGame) {
+        const lastEmit = this.state.emitGame;
+        this.setState({
+          emitGame: '',
+        }, () => socket.emit('GAME_OVER', lastEmit));
+      }
+    } else if (collisionResult && collisionResult.length) {
       if (collisionResult[1]) { // winner found
         // end tick to play animation and start tick back after animation is over
         this.endTick(false, 'collision check - Win');
@@ -263,14 +261,19 @@ class Demo extends React.Component {
   gamePlay = (e) => {
     const ans = (playerMoves(e, this.props.game, this.canvasContextMajor));
     if (ans) {
-      if (ans === 'tick') this.tick();
-      else this.drawScreen(ans);
+      if (ans === 'tick') {
+        this.endTick(false, 'Down Key');
+        this.tick();
+      } else this.drawScreen(ans);
     }
   }
-
+  arrowKeyLag = (e) => {
+    if (e.keyCode === 40) this.startTick(false);
+  }
+  /* opponent component Callbacks */
   handleMultiplayer = () => {
     if (this.props.user.authenticated) {
-      this.endTick(false, 'multiPlayer selected');
+      this.resetBoard(false);
       this.setState({
         multiPlayer: !this.state.multiPlayer,
       });// don't forget to add reset board call back here
@@ -282,6 +285,16 @@ class Demo extends React.Component {
   gameEmit = (sock) => {
     this.setState({
       emitGame: sock.socketId,
+    }, () => this.resetBoard());
+  }
+
+  gameOver = (db) => {
+    if (db) {
+      /* send to route that adds to match collection */
+    }
+    this.setState({
+      multiPlayer: false,
+      emitGame: '',
     }, () => this.resetBoard());
   }
   render() {
@@ -303,14 +316,15 @@ class Demo extends React.Component {
             height={this.props.game.canvas.canvasMajor.height}
             tabIndex="0"
             onKeyDown={e => this.gamePlay(e)}
+            onKeyUp={e => this.arrowKeyLag(e)}
           />
           {this.state.multiPlayer ?
             <Opponent
-              onFloorRaise={() => this.floorRaise()}
-              gameOver={this.state.gameOver}
-              difficulty={this.state.difficulty}
-              onReset={() => this.resetBoard()}
+              onReset={reStart => this.resetBoard(reStart)}
               onGameEmit={toSocket => this.gameEmit(toSocket)}
+              onFloorRaise={() => this.floorRaise()}
+              onGameOver={db => this.gameOver(db)}
+              difficulty={this.state.difficulty}
             />
             :
             null

@@ -21,8 +21,6 @@ module.exports = (socket) => {
       ...playerPool.slice(indexOfDisconnected + 1)];
     io.emit('CURRENT_POOL', profileResponder(socket.id));
   });
-
-  // Playe pool set up
   // PLAYER_JOINED = multiplayer button click
   socket.on('PLAYER_JOINED', (profile) => {
     const playerProfile = JSON.parse(profile);
@@ -51,7 +49,7 @@ module.exports = (socket) => {
     const playerB = playerPool[playerBIndex];
     io.to(players[0]).emit('START_GAME', playerB); // emit the opponents
     io.to(players[1]).emit('START_GAME', playerA);
-    // remove socekt IDs from room and add to active Players
+    // remove socekt IDs from pool and add to active Players
     for (let i = 0; i < players.length; i += 1) {
       const poolIds = playerPool.map(p => p.socketId);
       if (poolIds.includes(players[i])) {
@@ -65,6 +63,20 @@ module.exports = (socket) => {
 
   socket.on(SIMULATE_GAMEPLAY, (msg) => {
     io.to(msg.socketId).emit(SIMULATE_GAMEPLAY, msg.gameState); // emit the opponents
+  });
+
+  socket.on('GAME_OVER', (winner) => {
+    const playerSetIndex = activePlayers.findIndex(players =>
+      (players[0] === winner || players[1] === winner));
+    if (playerSetIndex < 0) return;
+    const looser = activePlayers[playerSetIndex].filter(p =>
+      winner !== p)[0];
+
+    console.log(`winner is ${winner} and looser is ${looser}`);
+    activePlayers.splice(playerSetIndex, 1);
+
+    io.to(winner).emit('GAME_OVER', winner); // winner gets true
+    io.to(looser).emit('GAME_OVER', winner);
   });
 };
 
