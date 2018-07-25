@@ -164,13 +164,10 @@ class Opponent extends React.Component {
     this.setState(copyOfState, () => this.setGame());
   }
 
-  processGameEnd = (winnerSocketId) => {
-    this.props.onReset(false);
+  processGameEnd = (isWinner) => {
     this.props.onClearCanvas();
     clearCanvas(this.canvasOpponentContext, this.state.gameState);
     // isWinner , true if client won
-    const isWinner = winnerSocketId === this.state.selfSocketId;
-    // entry for database
     const databaseEntry = isWinner ?
       {
         difficulty: this.props.difficulty,
@@ -191,6 +188,7 @@ class Opponent extends React.Component {
         ],
       }
       : null;
+    this.props.onReset(false);
     let startCounter = 10;
     const gameEndId = setInterval(() => {
       this.setState({

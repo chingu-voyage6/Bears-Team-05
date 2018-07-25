@@ -194,12 +194,12 @@ class Demo extends React.Component {
     const collisionResult = runCollisionTest(this.props.game, locatedShape);
     if (collisionResult && !collisionResult.length) {
       this.endTick(true, 'collision check - game done');
-      if (this.state.emitGame) {
-        const lastEmit = this.state.emitGame;
+      // By Nature of the game, looser is the one that will send this signal
+      if (this.state.multiPlayer && this.state.emitGame) {
         this.setState({
           emitGame: '',
-        }, () => socket.emit('GAME_OVER', lastEmit));
-      }
+        }, () => socket.emit('GAME_OVER', ''));
+      } else this.gameOver();
     } else if (collisionResult && collisionResult.length) {
       if (collisionResult[1]) { // winner found
         // end tick to play animation and start tick back after animation is over
@@ -289,15 +289,28 @@ class Demo extends React.Component {
     }, () => this.resetBoard());
   }
 
-  gameOver = (db) => {
-    if (db) {
-      /* send to route that adds to match collection */
-    }
+  gameOver = (multiPlayerData) => {
+    const databaseEntry = !multiPlayerData && this.props.user.authenticated ?
+      {
+        multiPlayer: false,
+        players: [
+          {
+            name: this.props.user.displayName,
+            _id: this.props.user._id,
+            score: this.props.game.points.totalLinesCleared,
+          },
+        ],
+      }
+      :
+      multiPlayerData;
+
+    if (databaseEntry) console.log(databaseEntry); // send to Match route db
     this.setState({
       multiPlayer: false,
       emitGame: '',
     }, () => this.resetBoard());
   }
+
   render() {
     if (Object.keys(this.props.game).length) {
       return (
