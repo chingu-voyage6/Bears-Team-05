@@ -64,9 +64,14 @@ export const drawRuble = (ctx, state, opponent = false) => {
 };
 
 export const drawBoundary = (ctx, state) => {
-  const yBoundary = state.rubble.boundaryCells.map(c => Number(c.split('-')[1]));
-  const boundaryHeight = (Array.from(new Set(yBoundary)).length - 1) *
-   state.activeShape.unitBlockSize;
+  const { rubble, activeShape } = state;
+  const yBoundary = rubble.boundaryCells.map(c => Number(c.split('-')[1]));
+  console.log('================');
+  console.log(yBoundary);
+  const boundaryHeight = (new Set(yBoundary).size - 1) *
+  activeShape.unitBlockSize;
+  console.log('boundaryHeight:', boundaryHeight);
+  console.log('================');
   const yStart = ctx.canvas.height - boundaryHeight;
   const img = new Image();
   img.src = floorPattern;
