@@ -2,22 +2,38 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import './Demo.css';
 
+import { deepCopy } from '../../utils';
 import { socket } from '../../Actions/socket';
 import { SIMULATE_GAMEPLAY } from '../../constants';
 // connect to redux and get action creators
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
-import { gameReset, nextShape, updateScreen,
-  raiseFloor, collide, speedUp, pause } from '../../Actions/tetris';
+import {
+  gameReset,
+  nextShape,
+  updateScreen,
+  raiseFloor,
+  collide,
+  speedUp,
+  pause,
+} from '../../Actions/tetris';
 
 // custom functions
 import tetrisShapes from './scripts/shapes';
 import shapeLocator from './scripts/locateShape';
 import { runCollisionTest } from './scripts/collision';
-import { clearCanvas, drawShape,
-  drawRuble, winRubble, drawNextShape, drawBoundary, drawCells } from './scripts/canvas';
+import {
+  clearCanvas,
+  drawShape,
+  drawRuble,
+  winRubble,
+  drawNextShape,
+  drawBoundary,
+  drawCells,
+} from './scripts/canvas';
 import playerMoves from './scripts/player';
-// react Components
+
+// child Components
 import Controls from './controls';
 import Opponent from './opponent';
 
@@ -51,9 +67,11 @@ class Demo extends React.Component {
     this.canvasMajor = React.createRef();
     this.canvasMinor = React.createRef();
   }
+
   componentDidMount() {
     this.resetBoard();
   }
+
   componentDidUpdate(prevProps) {
     if (Object.keys(prevProps.game).length) {
       if ((this.props.game.points.level !== prevProps.game.points.level) &&
@@ -75,7 +93,7 @@ class Demo extends React.Component {
     this.endTick(true, 'componentWillUnmount');
   }
 
-  resetBoard =async (reStart = true) => {
+  resetBoard = async (reStart = true) => {
     await this.props.actions.gameReset();
     const canvasMajor = this.canvasMajor.current;
     const canvasMinor = this.canvasMinor.current;
@@ -99,36 +117,37 @@ class Demo extends React.Component {
   }
 
   tick = () => {
-    if (this.props.game.paused) return;
+    const { paused, activeShape } = this.props.game;
+    if (paused) return;
     // handle y direction movements
-    const copyOfActiveShape = Object.assign({}, this.props.game.activeShape);
+    const copyOfActiveShape = deepCopy(activeShape);
     // console.log(`bbox @ tick ${this.props.game.activeShape.boundingBox}`)
-    copyOfActiveShape.yPosition += this.props.game.activeShape.unitBlockSize;
+    copyOfActiveShape.yPosition += activeShape.unitBlockSize;
     this.drawScreen(copyOfActiveShape);
   }
 
-  endTick = async (gameOver, comments) => {
+  endTick = (gameOver/* , comments */) => {
     this.abortCounter += 1;
-    console.log(`Called by ${comments} , attempts = ${this.abortCounter}`);
+    // console.log(`Called by ${comments} , attempts = ${this.abortCounter}`);
     clearInterval(this.downInterval);
-    await this.props.actions.pause(true);
+    this.props.actions.pause(true);
     if (gameOver) {
       clearCanvas(this.canvasContextMajor, this.props.game, true);
     }
   }
 
-  speedUp = async () => {
-    await this.props.actions.speedUp();
+  speedUp = () => {
+    this.props.actions.speedUp();
     this.startTick();
   }
 
-  newShape = async () => {
+  newShape = () => {
     const randomShape = this.props.game.nextShape ?
       this.initializeShape(this.props.game.nextShape) :
       this.initializeShape(tetrisShapes.getRandShapeName());
     const newShapeName = tetrisShapes.getRandShapeName();
     const nextShapeInfo = this.initializeShape(newShapeName);
-    await this.props.actions.nextShape(newShapeName);
+    this.props.actions.nextShape(newShapeName);
     drawNextShape(this.canvasContextMinor, nextShapeInfo, this.props.game);
 
     this.drawScreen(randomShape);
@@ -244,16 +263,16 @@ class Demo extends React.Component {
   }
 
   /* Handle Player Events Below */
-  handlePause = async () => {
+  handlePause = () => {
     this.canvasMajor.current.focus();
-    await this.props.actions.pause(!this.props.game.paused);
+    this.props.actions.pause(!this.props.game.paused);
   }
 
-  floorRaise = async () => {
+  floorRaise = () => {
     this.endTick(false, 'floor raise');
     this.canvasMajor.current.focus();
     clearCanvas(this.canvasContextMajor, this.props.game, true); // clear canvasMajor
-    await this.props.actions.raiseFloor(this.props.game.rubble);
+    this.props.actions.raiseFloor(this.props.game.rubble);
     // const makeNewShape = !!this.state.multiPlayer;
     this.startTick(false);
   }
