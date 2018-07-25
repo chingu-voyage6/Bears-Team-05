@@ -34,7 +34,7 @@ export const updateScreen = data => ({
 
 export const raiseFloor = oldRubble => ({
   type: RAISE_FLOOR,
-  payload: oldRubble,
+  oldRubble,
 });
 
 export const collide = data => ({

@@ -8,7 +8,7 @@ import {
   SCREEN_UPDATE,
 } from '../constants';
 
-import { setBoundry, getNewOccupiedCells, getNewBoundary } from '../utils';
+import { setBoundary, getNewOccupiedCells, getNewBoundary } from '../utils';
 
 const initialState = {
   timerInterval: 700,
@@ -54,7 +54,7 @@ const gameReducer = (state = initialState, action) => {
         ...initialState,
         rubble: {
           ...initialState.rubble,
-          boundaryCells: setBoundry(state.activeShape, initialState.canvas.canvasMajor),
+          boundaryCells: setBoundary(state.activeShape, initialState.canvas.canvasMajor),
         },
       };
 
@@ -89,8 +89,8 @@ const gameReducer = (state = initialState, action) => {
         ...state,
         rubble: {
           ...state.rubble,
-          occupiedCells: getNewOccupiedCells(action.payload),
-          boundaryCells: getNewBoundary(action.payload, state),
+          occupiedCells: getNewOccupiedCells(action.oldRubble),
+          boundaryCells: getNewBoundary(action.oldRubble, state),
           winRows: null,
         },
       };
