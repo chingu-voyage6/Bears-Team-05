@@ -126,9 +126,9 @@ class Demo extends React.Component {
     this.drawScreen(copyOfActiveShape);
   }
 
-  endTick = (gameOver/* , comments */) => {
+  endTick = (gameOver, comments) => {
     this.abortCounter += 1;
-    // console.log(`Called by ${comments} , attempts = ${this.abortCounter}`);
+    console.log(`Called by ${comments} , attempts = ${this.abortCounter}`);
     clearInterval(this.downInterval);
     this.props.actions.pause(true);
     if (gameOver) {
@@ -286,9 +286,11 @@ class Demo extends React.Component {
       } else this.drawScreen(ans);
     }
   }
+
   arrowKeyLag = (e) => {
     if (e.keyCode === 40) this.startTick(false);
   }
+
   /* opponent component Callbacks */
   handleMultiplayer = () => {
     if (this.props.user.authenticated) {
