@@ -77,8 +77,8 @@ module.exports = (socket) => {
     activePlayers.splice(playerSetIndex, 1);
     console.log(`winner is ${winner} and looser is ${socket.id}`);
 
-    io.to(winner).emit('GAME_OVER', true); // winner gets true
-    io.to(socket.id).emit('GAME_OVER', false);
+    io.to(winner).emit('GAME_END', true); // winner gets true
+    io.to(socket.id).emit('GAME_END', false);
   });
 };
 
