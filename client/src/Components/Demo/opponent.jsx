@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-
+import './opponentdescription.css';
 // connect to redux
 import { connect } from 'react-redux';
 
@@ -57,7 +57,6 @@ class Opponent extends React.Component {
     socket.emit('REMOVE_PLAYER', this.state.selfSocketId);
   }
 
-
   setGame = () => {
     if (Object.keys(this.state.gameState).length) {
       // full deep copy of game state needed as object mutation becomes a problem
@@ -89,18 +88,18 @@ class Opponent extends React.Component {
       });
     }
   }
-  setDifficulty = (e) => {
-    this.props.onSetDifficulty(Number(e.target.value));
+  setDifficulty = (val) => {
+    this.props.onSetDifficulty(val);
   }
 
   processFloorRaise = () => {
     /*
-    Difficulty      player clears          Floors added
-    -------------------------------------------------
-      1               4                        1
-      2               3                        1
-      3               2                        1
-      4               1                        1
+    Difficulty                                 Description
+    -----------------------------------------------------------------------------------
+      1               After player clears 4 rows , floor is raised by 1 row on opponent
+      2               After player clears 3 rows , floor is raised by 1 row on opponent
+      3               After player clears 2 rows , floor is raised by 1 row on opponent
+      4               After player clears 1 row  , floor is raised by 1 row on opponent
     */
     const { totalLinesCleared } = this.state.gameState.points;
     const difficultyMap = [[4, 1], [3, 2], [2, 3], [1, 4]]; // [[level, ]]
@@ -114,7 +113,6 @@ class Opponent extends React.Component {
   }
 
   /* process socket-in-coming below */
-
   processPool = (poolData) => {
     const checkSelfSocketId = this.state.selfSocketId === '' ? poolData.self : this.state.selfSocketId;
     const nonSelfPoolData = poolData.pool.filter(p => p.socketId !== checkSelfSocketId);
@@ -230,6 +228,7 @@ class Opponent extends React.Component {
       <div className="opponentContainer">
         <OpponentDescription
           opponentState={this.state}
+          difficulty={this.props.difficulty}
           setDifficulty={this.setDifficulty}
           requestInvite={sId => this.requestInvite(sId)}
           acceptInvite={() => this.acceptInvite()}
