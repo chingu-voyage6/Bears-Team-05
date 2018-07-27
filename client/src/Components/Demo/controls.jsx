@@ -4,7 +4,7 @@ import './controls.css';
 /* font awesome */
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPowerOff, faPause, faPlay, faUsers, faArrowCircleLeft } from '@fortawesome/free-solid-svg-icons';
+import { faPowerOff, faPause, faPlay, faUsers, faUser } from '@fortawesome/free-solid-svg-icons';
 
 /* adds font awesome icons */
 library.add(faPowerOff, faPause, faPlay);
@@ -19,33 +19,34 @@ const Controls = (props) => {
           height={props.game.canvas.canvasMinor.height}
           tabIndex="0"
         />
-
-        <FontAwesomeIcon
-          className="reset"
-          icon={faPowerOff}
-          onClick={() => props.onReset(false)}
-        />
+        <div className="resetPause">
+          <FontAwesomeIcon
+            className="reset"
+            icon={faPowerOff}
+            onClick={() => props.onReset(false)}
+          />
+          {
+            props.game.paused ?
+              <FontAwesomeIcon
+                className="play"
+                icon={faPlay}
+                onClick={props.onhandlePause()}
+              />
+              :
+              <FontAwesomeIcon
+                className="pause"
+                icon={faPause}
+                onClick={props.onhandlePause()}
+              />
+          }
+        </div>
         <FontAwesomeIcon
           className="multiplayer"
           icon={faUsers}
           onClick={props.onMultiPlayer()}
         />
-        {
-          props.game.paused ?
-            <FontAwesomeIcon
-              className="play"
-              icon={faPlay}
-              onClick={props.onhandlePause()}
-            />
-            :
-            <FontAwesomeIcon
-              className="pause"
-              icon={faPause}
-              onClick={props.onhandlePause()}
-            />
-        }
 
-        <button onClick={() => props.onFloorRaise()}>
+        <button className="raise" onClick={() => props.onFloorRaise()}>
           Raise Floor
         </button>
         <label htmlFor="test">Lines Cleared</label>
@@ -67,7 +68,7 @@ const Controls = (props) => {
       />
       <FontAwesomeIcon
         className="multiplayer"
-        icon={faArrowCircleLeft}
+        icon={faUser}
         onClick={props.onMultiPlayer()}
       />
       <label htmlFor="test">Lines Cleared</label>

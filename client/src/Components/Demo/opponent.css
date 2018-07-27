@@ -30,7 +30,11 @@
     background:rgb(204, 153, 238);
     text-transform: uppercase;
 }
-
+.DifficultySet{
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+}
 .Invitation{
     justify-content: space-evenly;
     height: 100%;

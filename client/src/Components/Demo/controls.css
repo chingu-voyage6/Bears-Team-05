@@ -8,22 +8,16 @@
     margin-right: 5%;
     color: rgb(7, 44, 53);
     font-weight: 900;
+    text-transform: uppercase;
   }
-button{
+.raise{
   border-radius: 10px;
-  margin-top:10px;
   height:40px;
-  font-size:25px;
+  font-size:20px;
   width:80%;
   cursor:pointer;
-}
-
-.buttonmulti-multi{
-  background: rgb(141, 247, 141);
-}
-
-.buttonmulti-single{
-  background: rgb(121, 138, 184);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  text-transform: uppercase;
 }
 
 .socket{
@@ -33,6 +27,11 @@ button{
   text-transform: uppercase;
 }
 
+.resetPause{
+  display: flex;
+  justify-content: space-around;
+  width:100%;
+}
 .reset{
   color: rgb(59, 9, 153);
   font-size: 40px;
@@ -55,4 +54,15 @@ button{
   color:rgb(170, 38, 247);
   font-size: 40px;
   cursor: pointer;
+}
+
+.reset:hover, .pause:hover, .play:hover, .multiplayer:hover {
+  transition: all 1s;
+  transform: scale(1.25);
+}
+
+.raise:hover{
+  transition: all 1s;
+  transform: translateY(-5px);
+  box-shadow: 5px 10px;
 }
