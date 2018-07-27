@@ -19,34 +19,34 @@ const Controls = (props) => {
           height={props.game.canvas.canvasMinor.height}
           tabIndex="0"
         />
-        <div className="resetPause">
+        <div className="controls__resetPause">
           <FontAwesomeIcon
-            className="reset"
+            className="controls__resetPause__reset"
             icon={faPowerOff}
             onClick={() => props.onReset(false)}
           />
           {
             props.game.paused ?
               <FontAwesomeIcon
-                className="play"
+                className="controls__resetPause__play"
                 icon={faPlay}
                 onClick={props.onhandlePause()}
               />
               :
               <FontAwesomeIcon
-                className="pause"
+                className="controls__resetPause__pause"
                 icon={faPause}
                 onClick={props.onhandlePause()}
               />
           }
         </div>
         <FontAwesomeIcon
-          className="multiplayer"
+          className="controls__multiplayer"
           icon={faUsers}
           onClick={props.onMultiPlayer()}
         />
 
-        <button className="raise" onClick={() => props.onFloorRaise()}>
+        <button className="controls__raise" onClick={() => props.onFloorRaise()}>
           Raise Floor
         </button>
         <label htmlFor="test">Lines Cleared</label>
@@ -67,7 +67,7 @@ const Controls = (props) => {
         tabIndex="0"
       />
       <FontAwesomeIcon
-        className="multiplayer"
+        className="controls__multiplayer"
         icon={faUser}
         onClick={props.onMultiPlayer()}
       />
@@ -77,7 +77,7 @@ const Controls = (props) => {
       <label htmlFor="test">{props.difficulty}</label>
       {
         props.socketId ?
-          <label className="socket" htmlFor="test">{props.socketId}</label>
+          <label className="controls__socket" htmlFor="test">{props.socketId}</label>
           :
           null
       }
