@@ -48,7 +48,6 @@ const getPlayersBestScores = (req, res, next) => {
  *    multiplayer games played, wins/losses
 */
 const getUsersOwnStats = (req, res, next) => {
-  console.log(req.user);
   if (!req.user || !req.user._id) {
     return res.status(400).json({ message: 'Authentication required.' });
   }
