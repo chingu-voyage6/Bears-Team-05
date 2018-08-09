@@ -42,7 +42,6 @@ const shapeLocator = (
         */
         if (q.length === 4) {
           match = true;
-          drawGrid(x[0], y[0], match, b, canvasContext);
           copyOfActiveShape.cells.push([i, j]);
         }
         if (copyOfActiveShape.cells.length === 4) doloop = false;
