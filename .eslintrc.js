@@ -24,7 +24,12 @@ module.exports = {
       2,
       { 'SwitchCase': 1 }
     ],
+    "jsx-a11y/anchor-is-valid": [ "error", {
+      "components": [ "Link" ],
+      "specialLink": [ "to" ]
+    }],
     'no-console': 0,
+    'no-underscore-dangle': ["error", { "allow": ["_id"] }],
     'padded-blocks': ['error', {
       'blocks': 'never',
       'classes': 'always',
