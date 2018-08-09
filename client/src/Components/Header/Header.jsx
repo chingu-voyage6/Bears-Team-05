@@ -65,9 +65,6 @@ class Header extends React.Component {
             <NavLink to="/" exact><h1>Tetris Duel</h1></NavLink>
           </div>
           <div className="header__right">
-            <NavLink activeClassName="is-active" to="/demo">
-              Demo
-            </NavLink>
             <NavLink activeClassName="is-active" to="/leaderboard">
               Leaderboard
             </NavLink>
