@@ -4,7 +4,7 @@ require('dotenv').config();
 
 const ENV = process.env.NODE_ENV || 'development';
 const PORT = process.env.PORT || 5000;
-
+const path = require('path');
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
@@ -25,7 +25,7 @@ require('./services/passportConfig');
 
 
 /* ============================== MIDDLEWARE =============================== */
-
+app.use('/', express.static(path.join(__dirname, '../client/build')));
 app.use(bodyParser.json({ limit: '5mb' }));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
@@ -59,3 +59,7 @@ mongoose.connect(dbConfig.url)
   });
 
 mongoose.set('debug', true);
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
+});

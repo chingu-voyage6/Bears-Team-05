@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import './Demo.css';
+import './Game.css';
 
 import { socket } from '../../Actions/socket';
 import { SIMULATE_GAMEPLAY } from '../../constants';

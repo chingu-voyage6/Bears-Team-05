@@ -51,9 +51,8 @@ const getUsersOwnStats = (req, res, next) => {
   if (!req.user || !req.user._id) {
     return res.status(400).json({ message: 'Authentication required.' });
   }
-  const { playerId } = req.user;
-
-  return Match.getOwnStats(playerId)
+  const { _id } = req.user;
+  return Match.getOwnStats(_id)
     .then(stats => res.json(stats))
     .catch(err => next(err));
 };

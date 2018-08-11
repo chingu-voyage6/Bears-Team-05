@@ -6,7 +6,6 @@ import Footer from '../Components/Footer/Footer';
 import FourOhFour from '../Components/FourOhFour/FourOhFour';
 import Header from '../Components/Header/Header';
 import Landing from '../Components/Landing/Landing';
-import Demo from '../Components/Demo/Demo';
 import Leaderboard from '../Components/Leaderboard/Leaderboard';
 import Login from '../Components/Login/Login';
 import Privacy from '../Components/Privacy/Privacy';
@@ -18,7 +17,6 @@ const AppRouter = () => (
       <Header />
       <Switch>
         <Route path="/" exact component={Landing} />
-        <Route path="/demo" component={Demo} />
         <Route path="/leaderboard" component={Leaderboard} />
         <Route path="/login" component={Login} />
         <Route path="/privacy" component={Privacy} />
